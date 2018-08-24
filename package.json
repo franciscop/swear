@@ -1,0 +1,25 @@
+{
+  "name": "magic-promises",
+  "version": "1.0.0",
+  "description": "✨ Simplify dealing with promises for async-heavy situations",
+  "main": "magic.js",
+  "scripts": {
+    "test": "jest --coverage"
+  },
+  "keywords": [],
+  "author": "Francisco Presencia <public@francisco.io> (https://francisco.io/)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/franciscop/magic-promises.git"
+  },
+  "bugs": {
+    "url": "https://github.com/franciscop/magic-promises/issues"
+  },
+  "homepage": "https://github.com/franciscop/magic-promises#readme",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-jest": "^21.2.0",
+    "babel-preset-env": "^1.6.1"
+  }
+}
