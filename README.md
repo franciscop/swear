@@ -6,7 +6,7 @@ Sintax sugar for dealing with promises in a much simpler way for async-heavy wor
 npm install magic-promises
 ```
 
-Builds the promise chain internally, so your code can be chained like you would do with sync strings, arrays, etc:
+Builds the promise chain internally, so your code can be used like you would do with sync strings, arrays, etc:
 
 ```js
 // With a bit of magic()
