@@ -1,39 +1,56 @@
 # ✨ Magic Promises
 
-Simplify dealing with promises greatly by deferring operations to the resolved value of a promise in successive steps.
+Sintax sugar for dealing with promises in a much simpler way for async-heavy workflows:
 
 ```js
 npm install magic-promises
 ```
 
-The main advantage is syntax sugar, making working with promises a lot more efficient if you use them heavily:
+Builds the promise chain internally, so your code can be chained like you would do with sync strings, arrays, etc:
 
 ```js
 // With a bit of magic()
 const value = await magic(data).map(op1).filter(op2).map(op3);
 
-// NATIVE; this is how you'd do the same without magic()
+// NATIVE; the pure-javascript way of dealing with the same is a lot longer
 const value = await Promise.all(data.map(op1)).then(files => files.filter(op2)).then(files => files.map(op3));
 
-// NATIVE; this is a more readable alternative, but still longer
+// NATIVE; even when we try to make it more readable it is still longer:
 let value = await Promise.all(data.map(op1));
 value = val1.filter(op2);
 value = await val2.map(op3)
 ```
 
-> Note: all the following examples must be run in an `async` context. I am using the great libraries `mz/fs` and `got`.
+> Note: all the examples must be run in an `async` context. I am using the great libraries `mz/fs` and `got`.
 
-Read all the files in the current directory:
+
+
+## API
+
+The coolest bit is that there is no API. You can call the methods, properties, etc of the value that you pass to magic():
 
 ```js
-// You can apply `.map()` straight to the output of magic()
-const files = await magic(readdir('.')).map(file => readFile(file, 'utf-8'));
-
-// NATIVE; this is how you'd have to do with vanilla JS
-const files = await readdir('.').then(files => files.map(file => readFile(file, 'utf-8')));
+const value = await magic(3.1).toFixed(1).split('.').map(n => n * 2).join('.');
+console.log(value);
+// 6.2 (string)
 ```
 
 
+
+## Examples
+
+This library is specially useful if we want to do things like fetching urls, mapping their arrays, working with strings, etc. For instance, let's read all the files in the current directory:
+
+```js
+// You can apply `.map()` straight to the output of magic()
+const files = await magic(readdir(__dirname)).map(file => readFile(file, 'utf-8'));
+
+// NATIVE; this is how you'd have to do with vanilla JS
+const files = await readdir(__dirname).then(files => files.map(file => readFile(file, 'utf-8')));
+
+// PRO; using my library fs-array, based on magic-promises, it gets better:
+const files = await dir(__dirname).map(read);
+```
 
 Retrieve a bunch of websites with valid responses
 
@@ -66,7 +83,8 @@ const sum = await magic(got('example.com/data.csv'))
 ```
 
 
+## Acknowledgements
 
-Specially useful for library authors. See libraries based on this:
+Libraries based on this:
 
-- [`fs-array`](https://npmjs.com/package/fs-array)
+- [`fs-array`](https://npmjs.com/package/fs-array) (from me).

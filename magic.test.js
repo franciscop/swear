@@ -161,6 +161,31 @@ describe('promises', () => {
 
 
 
+describe('numbers', () => {
+  it('initializes with a number', async () => {
+    expect(await magic(3)).toBe(3);
+    expect(await magic(3.3)).toBe(3.3);
+  });
+
+  it('can call number methods', async () => {
+    expect(await magic(3).toFixed(1)).toBe('3.0');
+    expect(await magic(3.33).toFixed(1)).toBe('3.3');
+  });
+
+  it('can concatenate to other methods', async () => {
+    expect(await magic(3).toFixed(1).split('.')).toEqual(['3','0']);
+    expect(await magic(3.33).toFixed(1).split('.')).toEqual(['3','3']);
+  });
+
+  it('can perform several operations', async () => {
+    expect(await magic(3.1).toFixed(1).split('.').map(n => n * 2).join('.')).toBe('6.2');
+  });
+});
+
+
+
+
+
 
 describe('strings', () => {
   it('initializes with strings', async () => {
