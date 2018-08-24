@@ -1,0 +1,15 @@
+machine:
+  node:
+    version: 8.0.0
+
+general:
+  artifacts:
+    - ./coverage
+
+dependencies:
+  pre:
+    - sudo apt-get update
+
+test:
+  post:
+    - bash <(curl -s https://codecov.io/bash)
