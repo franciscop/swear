@@ -1,4 +1,4 @@
-# ✨ Magic Promises
+# ✨ Magic Promises [![status](https://circleci.com/gh/franciscop/magic-promises.svg?style=shield)](https://circleci.com/gh/franciscop/magic-promises)
 
 Sintax sugar for dealing with promises in a much simpler way for async-heavy workflows:
 
