@@ -5,9 +5,10 @@
   "main": "magic.min.js",
   "scripts": {
     "build": "rollup magic.js --name magic --output.format umd | uglifyjs -o magic.min.js",
+    "gzip": "echo $(gzip -c magic.min.js | wc -c) bytes",
     "test": "jest --coverage"
   },
-  "keywords": [],
+  "keywords": ["promise", "async", "manipulation", "array", "number", "object"],
   "author": "Francisco Presencia <public@francisco.io> (https://francisco.io/)",
   "license": "MIT",
   "repository": {
