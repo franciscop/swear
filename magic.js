@@ -83,4 +83,4 @@ const root = obj => new Proxy({}, { get: getter(obj) });
 // FUNC: it can be called either with a getter or as a function `op1()`, `prop1`
 const func = obj => new Proxy(() => {}, { get: getter(obj), apply: applier(obj) });
 
-module.exports = root;
+export default root;

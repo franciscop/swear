@@ -1,9 +1,10 @@
 {
   "name": "magic-promises",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "✨ Simplify dealing with promises for async-heavy situations",
-  "main": "magic.js",
+  "main": "magic.min.js",
   "scripts": {
+    "build": "rollup magic.js --name magic --output.format umd | uglifyjs -o magic.min.js",
     "test": "jest --coverage"
   },
   "keywords": [],
@@ -20,7 +21,8 @@
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-jest": "^21.2.0",
-    "babel-preset-env": "^1.6.1",
-    "jest": "^23.5.0"
+    "babel-preset-env": "^1.7.0",
+    "jest": "^23.5.0",
+    "uglify-es": "^3.3.9"
   }
 }
