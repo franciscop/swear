@@ -8,7 +8,14 @@
     "gzip": "echo $(gzip -c magic.min.js | wc -c) bytes",
     "test": "jest --coverage"
   },
-  "keywords": ["promise", "async", "manipulation", "array", "number", "object"],
+  "keywords": [
+    "promise",
+    "async",
+    "manipulation",
+    "array",
+    "number",
+    "object"
+  ],
   "author": "Francisco Presencia <public@francisco.io> (https://francisco.io/)",
   "license": "MIT",
   "repository": {
