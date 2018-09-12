@@ -1,6 +1,6 @@
 {
   "name": "magic-promises",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "✨ Simplify dealing with promises for async-heavy situations",
   "main": "magic.min.js",
   "scripts": {
