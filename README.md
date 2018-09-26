@@ -13,15 +13,13 @@ Builds the promise chain internally, so your code can be used like you would do 
 const value = await magic(data).map(op1).filter(op2).map(op3);
 
 // NATIVE; the pure-javascript way of dealing with the same is a lot longer
-const value = await Promise.all(data.map(op1)).then(files => files.filter(op2)).then(files => files.map(op3));
+const value = await Promise.all(data.map(op1)).then(files => files.filter(op2)).then(files => Promise.all(files.map(op3)));
 
 // NATIVE; even when we try to make it more readable it is still longer:
 let value = await Promise.all(data.map(op1));
-value = val1.filter(op2);
-value = await val2.map(op3)
+value = value.filter(op2);
+value = await Promise.all(value.map(op3));
 ```
-
-> Note: all the examples must be run in an `async` context. I am using the great libraries `mz/fs` and `got`.
 
 
 
@@ -39,6 +37,8 @@ console.log(value);
 
 ## Examples
 
+> Note: all these must be run in an `async` context. I am using the great libraries `mz/fs` and `got`.
+
 This library is specially useful if we want to do things like fetching urls, mapping their arrays, working with strings, etc. For instance, let's read all the files in the current directory:
 
 ```js
@@ -48,7 +48,7 @@ const files = await magic(readdir(__dirname)).map(file => readFile(file, 'utf-8'
 // NATIVE; this is how you'd have to do with vanilla JS
 const files = await readdir(__dirname).then(files => files.map(file => readFile(file, 'utf-8')));
 
-// PRO; using my library fs-array, based on magic-promises, it gets better:
+// PRO; using my library `fs-array`, based on magic-promises, it gets better:
 const files = await dir(__dirname).map(read);
 ```
 
