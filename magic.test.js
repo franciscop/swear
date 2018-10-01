@@ -234,6 +234,52 @@ describe('arrays', () => {
     const array = ['a', Promise.resolve('b'), [Promise.reject('c')]];
     expect(await magic(array).catch(err => err)).toEqual('c');
   });
+
+  it('can do a simple filter', async () => {
+    expect(await magic([1, 2, 3]).filter(a => a > 1)).toEqual([2, 3]);
+  });
+
+  it('maintains this on filter', async () => {
+    expect(await magic([1, 2, 3]).filter(function (a) {
+      return a > this;
+    }, 1)).toEqual([2, 3]);
+    expect(await magic([1, 2, 3]).filter(function (a) {
+      return a < this;
+    }, 3)).toEqual([1, 2]);
+  });
+
+  it('can do a regexp filter', async () => {
+    expect(await magic(['a', 'b', 'c']).filter(/(b|c)/)).toEqual(['b', 'c']);
+  });
+
+  it('can do an async filter', async () => {
+    expect(await magic([1, 2, 3]).filter(async a => a > 1)).toEqual([2, 3]);
+  });
+
+  it('maintains this on an async filter', async () => {
+    expect(await magic([1, 2, 3]).filter(function (a) {
+      return a > this;
+    }, 1)).toEqual([2, 3]);
+    expect(await magic([1, 2, 3]).filter(function (a) {
+      return a < this;
+    }, 3)).toEqual([1, 2]);
+  });
+
+  it('can do an async filter and chain it', async () => {
+    expect(await magic([1, 2, 3]).filter(async a => a > 1).map(async a => a**2)).toEqual([4, 9]);
+  });
+
+  it('can do an async filter after chaining it', async () => {
+    expect(await magic([1, 2, 3]).map(async a => a**2).filter(async a => a > 1)).toEqual([4, 9]);
+  });
+
+  it('has all the right params for filter', async () => {
+    expect(await magic([0, 1, 2]).filter(async (a, i, all) => {
+      expect(a).toEqual(i);
+      expect(all).toEqual([0, 1, 2]);
+      return a > 1;
+    })).toEqual([2]);
+  });
 });
 
 

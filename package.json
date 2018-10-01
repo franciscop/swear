@@ -14,7 +14,9 @@
     "manipulation",
     "array",
     "number",
-    "object"
+    "object",
+    "map",
+    "filter"
   ],
   "files": [],
   "author": "Francisco Presencia <public@francisco.io> (https://francisco.io/)",

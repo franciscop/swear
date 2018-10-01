@@ -3,7 +3,6 @@
 
 // Bind it to retrieve the original line
 // const log = console.log.bind(global);
-// const log = () => {};
 
 // Resolve a bit recursively
 const resolve = async value => {
@@ -12,10 +11,30 @@ const resolve = async value => {
   if (Array.isArray(value)) {
     return await Promise.all(value.map(resolve));
   }
-  return await value;
+  return value;
 };
 
 const reject = message => Promise.reject(new Error(message));
+
+
+
+// Extend each of the values of map with the appropriate fn
+const regexpCallback = cb => cb instanceof RegExp ? cb.test.bind(cb) : cb;
+const extend = (cb, self) => async (value, i, all) => ({
+  value,
+  extra: await regexpCallback(cb).call(self, value, i, all)
+});
+const extraUp = ({ extra }) => extra;
+const valueUp = ({ value }) => value;
+
+
+
+// Array methods - converted to async
+const extendArray = {
+  // Convert to extended async map, filter on the extra and extract the value
+  filter: (obj, cb, self) => resolve(obj.map(extend(cb, self)))
+    .then(arr => arr.filter(extraUp).map(valueUp))
+};
 
 
 
@@ -41,6 +60,13 @@ const getter = obj => (target, key) => {
   return func(resolve(obj).then(obj => {
     // Some times it will ask for Symbol; just return a low-key value
     if (typeof key === 'symbol') return obj[key];
+
+    // Filter it in an async fashion. As an extra kick, allow for RegExp
+    for (let k in extendArray) {
+      if (Array.isArray(obj) && key === k) {
+        return func((cb, self) => extendArray[k](obj, cb, self));
+      }
+    }
 
     // Returns the requested FUNCTION; so we need to bind the context
     // const res = magic(obj).map(item => {...});
