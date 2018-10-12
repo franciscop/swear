@@ -119,9 +119,9 @@ describe('promises', () => {
     expect(await magic(Promise.resolve('abc')).split('')).toEqual(['a', 'b', 'c']);
     expect(await magic(Promise.resolve('abc')).split('')).toEqual(['a', 'b', 'c']);
     expect(await magic(Promise.reject('Hello')).catch(err => err)).toEqual('Hello');
-    // expect(await magic(Promise.reject('Hello')).catch(err => 'a b')).toEqual('a b');
-    // expect(await magic(Promise.reject('Hello')).catch(err => 'a b').split(' ')).toEqual(['a', 'b']);
-    // expect(await magic(Promise.reject()).abc('').catch(err => 'Hello')).toEqual('Hello');
+    expect(await magic(Promise.reject('Hello')).catch(err => 'a b')).toEqual('a b');
+    expect(await magic(Promise.reject('Hello')).catch(err => 'a b').split).toBe(undefined);
+    expect(await magic(Promise.reject()).abc('').catch(err => 'Hello')).toEqual('Hello');
   });
 
   it('ignores intermediate links in the chain until catch', async () => {

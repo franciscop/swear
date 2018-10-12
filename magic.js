@@ -53,7 +53,7 @@ const getter = obj => (target, key) => {
   if (key === 'catch') return (...args) => {
     // log('GETTER CATCH', obj, ...args);
     // if (name === 'catch') return (...args) => play(prom.catch(...args), opts);
-    return root(resolve(obj).catch(...args));
+    return resolve(obj).catch(...args);
   };
 
   // Wrap it in a resolution so promises are first-class values
