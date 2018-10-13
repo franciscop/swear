@@ -53,7 +53,9 @@ const getter = obj => (target, key) => {
   if (key === 'catch') return (...args) => {
     // log('GETTER CATCH', obj, ...args);
     // if (name === 'catch') return (...args) => play(prom.catch(...args), opts);
-    return resolve(obj).catch(...args);
+    // We need the root() because we want to allow for catch() to continue working
+    //   like this: .map().catch().filter(). Without it, we end this bit.
+    return root(resolve(obj).catch(...args));
   };
 
   // Wrap it in a resolution so promises are first-class values
