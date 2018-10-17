@@ -18,7 +18,7 @@
     "map",
     "filter"
   ],
-  "files": [],
+  "files": ["magic.js"],
   "author": "Francisco Presencia <public@francisco.io> (https://francisco.io/)",
   "license": "MIT",
   "repository": {
