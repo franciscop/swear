@@ -1,6 +1,6 @@
 {
   "name": "magic-promises",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "✨ Simplify dealing with promises for async-heavy situations",
   "main": "magic.min.js",
   "scripts": {
@@ -18,7 +18,9 @@
     "map",
     "filter"
   ],
-  "files": ["magic.js"],
+  "files": [
+    "magic.js"
+  ],
   "author": "Francisco Presencia <public@francisco.io> (https://francisco.io/)",
   "license": "MIT",
   "repository": {
