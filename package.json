@@ -1,12 +1,13 @@
 {
-  "name": "magic-promises",
-  "version": "1.2.3",
+  "name": "swear",
+  "version": "1.0.0",
   "description": "✨ Simplify dealing with promises for async-heavy situations",
-  "main": "magic.min.js",
+  "main": "swear.min.js",
   "scripts": {
-    "build": "rollup magic.js --name magic --output.format umd | uglifyjs -o magic.min.js",
-    "gzip": "echo $(gzip -c magic.min.js | wc -c) bytes",
-    "test": "npm run build && jest --coverage"
+    "build": "rollup swear.js --name swear --output.format umd | uglifyjs -o swear.min.js",
+    "gzip": "echo $(gzip -c swear.min.js | wc -c) bytes",
+    "test": "npm run build && jest --coverage",
+    "watch": "jest --watch"
   },
   "keywords": [
     "promise",
@@ -19,18 +20,18 @@
     "filter"
   ],
   "files": [
-    "magic.js"
+    "swear.js"
   ],
   "author": "Francisco Presencia <public@francisco.io> (https://francisco.io/)",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/franciscop/magic-promises.git"
+    "url": "git+https://github.com/franciscop/swear.git"
   },
   "bugs": {
-    "url": "https://github.com/franciscop/magic-promises/issues"
+    "url": "https://github.com/franciscop/swear/issues"
   },
-  "homepage": "https://github.com/franciscop/magic-promises#readme",
+  "homepage": "https://github.com/franciscop/swear#readme",
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-jest": "^21.2.0",

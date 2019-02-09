@@ -31,9 +31,37 @@ const valueUp = ({ value }) => value;
 
 // Array methods - converted to async
 const extendArray = {
+  // Check whether every method returns a truthy value
+  every: async (obj, cb, self) => {
+    for (let i = 0; i < obj.length; i++) {
+      const { value, extra } = await extend(cb, self)(obj[i], i, obj);
+      if (!extra) return false;
+    }
+    return true;
+  },
+
   // Convert to extended async map, filter on the extra and extract the value
-  filter: (obj, cb, self) => resolve(obj.map(extend(cb, self)))
-    .then(arr => arr.filter(extraUp).map(valueUp))
+  filter: async (obj, cb, self) => {
+    const data = await resolve(obj.map(extend(cb, self)));
+    return data.filter(extraUp).map(valueUp);
+  },
+
+  // Iterate over the array, one at a time
+  find: async (obj, cb, self) => {
+    for (let i = 0; i < obj.length; i++) {
+      const { value, extra } = await extend(cb, self)(obj[i], i, obj);
+      if (extra) return value;
+    }
+  },
+
+  // Check whether every method returns a truthy value
+  some: async (obj, cb, self) => {
+    for (let i = 0; i < obj.length; i++) {
+      const { value, extra } = await extend(cb, self)(obj[i], i, obj);
+      if (extra) return true;
+    }
+    return false;
+  },
 };
 
 
@@ -64,10 +92,8 @@ const getter = obj => (target, key) => {
     if (typeof key === 'symbol') return obj[key];
 
     // Filter it in an async fashion. As an extra kick, allow for RegExp
-    for (let k in extendArray) {
-      if (Array.isArray(obj) && key === k) {
-        return func((cb, self) => extendArray[k](obj, cb, self));
-      }
+    if (Array.isArray(obj) && key in extendArray) {
+      return func((cb, self) => extendArray[key](obj, cb, self));
     }
 
     // Returns the requested FUNCTION; so we need to bind the context
@@ -96,8 +122,8 @@ const applier = obj => (target, self, args) => {
       return reject(`
         You tried to call the non-function "${JSON.stringify(obj)}" (${typeof obj}).
         This can happen in several situations like these:
-        - await magic(['a'])();  // <= wrong
-        - await magic(['a']).map(a => a)(a => a);  // <= wrong
+        - await swear(['a'])();  // <= wrong
+        - await swear(['a']).map(a => a)(a => a);  // <= wrong
       `);
     }
     return obj(...args);
