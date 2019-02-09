@@ -340,6 +340,11 @@ describe('arrays', () => {
       expect(await swear([1, 2, 3]).find(a => a > 5)).toEqual(undefined);
     });
 
+    it('resolves before using it', async () => {
+      expect(await swear([1, Promise.resolve(2), 3]).find(a => a > 1)).toEqual(2);
+      expect(await swear([1, 2, 3]).find(a => a > 5)).toEqual(undefined);
+    });
+
     it('is undefined if nothing is found', async () => {
       expect(await swear([1, 2, 3]).find(a => a > 5)).toEqual(undefined);
     });
@@ -382,6 +387,91 @@ describe('arrays', () => {
         expect(all).toEqual([0, 1, 2]);
         return a > 1;
       })).toEqual(2);
+    });
+  });
+
+  describe('.findIndex()', () => {
+    it('can do a simple findIndex()', async () => {
+      expect(await swear([1, 2, 3]).findIndex(a => a > 1)).toEqual(1);
+      expect(await swear([1, 2, 3]).findIndex(a => a > 5)).toEqual(-1);
+    });
+
+    it('is -1 if nothing is found', async () => {
+      expect(await swear([1, 2, 3]).findIndex(a => a > 5)).toEqual(-1);
+    });
+
+    it('maintains this on filter', async () => {
+      expect(await swear([1, 2, 3]).findIndex(compare, 1)).toEqual(1);
+      expect(await swear([1, 2, 3]).findIndex(compare, 3)).toEqual(-1);
+    });
+
+    it('can do a regexp filter', async () => {
+      expect(await swear(['a', 'b', 'c']).findIndex(/(b|c)/)).toEqual(1);
+    });
+
+    it('can do an async filter', async () => {
+      expect(await swear([1, 2, 3]).findIndex(async a => a > 1)).toEqual(1);
+    });
+
+    it('stops when it finds it', async () => {
+      let count = 0;
+      expect(await swear([1, 2, 3]).findIndex(async a => {
+        count++;
+        await wait(10);
+        return a === 1;
+      }));
+      expect(count).toBe(1);
+    });
+
+    it('maintains this on an async filter', async () => {
+      expect(await swear([1, 2, 3]).findIndex(compareAsync, 1)).toEqual(1);
+      expect(await swear([1, 2, 3]).findIndex(compareAsync, 3)).toEqual(-1);
+    });
+
+    it('can do an async filter after chaining it', async () => {
+      expect(await swear([1, 2, 3]).map(async a => a**2).findIndex(async a => a > 1)).toEqual(1);
+    });
+
+    it('has all the right params for filter', async () => {
+      expect(await swear([0, 1, 2]).findIndex(async (a, i, all) => {
+        expect(a).toEqual(i);
+        expect(all).toEqual([0, 1, 2]);
+        return a > 1;
+      })).toEqual(2);
+    });
+  });
+
+  describe('.forEach()', () => {
+    it('can do a simple forEach()', async () => {
+      const all = [];
+      expect(await swear([1, 2, 3]).forEach(a => {
+        all.push(a);
+      })).toEqual([1, 2, 3]);
+      expect(all).toEqual([1, 2, 3]);
+    });
+
+    it('maintains this', async () => {
+      await swear([1]).forEach(function () {
+        expect(this).toBe(25);
+      }, 25);
+      await swear([1]).forEach(async function () {
+        expect(this).toBe(25);
+      }, 25);
+    });
+
+    it('is chainable', async () => {
+      expect(await swear([1, 2, 3]).forEach(a => false).map(a => a ** 2)).toEqual([1, 4, 9]);
+      expect(await swear([1, 2, 3]).map(a => a ** 2).forEach(a => false)).toEqual([1, 4, 9]);
+      expect(await swear([1, 2, 3]).forEach(async a => false).map(a => a ** 2)).toEqual([1, 4, 9]);
+      expect(await swear([1, 2, 3]).map(a => a ** 2).forEach(async a => false)).toEqual([1, 4, 9]);
+    });
+
+    it('has all the right params for filter', async () => {
+      await swear([0, 1, 2]).forEach(async (a, i, all) => {
+        expect(a).toEqual(i);
+        expect(all).toEqual([0, 1, 2]);
+        return true;
+      });
     });
   });
 

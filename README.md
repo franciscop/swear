@@ -73,7 +73,7 @@ console.log(value); // 'C'
 
 For sync methods they behave the same way as the native counterparts. For `async` methods you need to be aware whether each of those callbacks is called in parallel (concurrent) or in series:
 
-- `.every()`: **series**, _"executes the provided callback function once for each element present in the array until it finds one where callback returns a falsy value"_ - [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every#Description)_
+- `.every()`: **series**, _"executes the provided callback function once for each element present in the array until it finds one where callback returns a falsy value"_ - [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every#Description).
 - `.filter()`: parallel
 - `.find()`: **series**
 - `.findIndex()`: **series**

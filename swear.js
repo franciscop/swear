@@ -20,9 +20,10 @@ const reject = message => Promise.reject(new Error(message));
 
 // Extend each of the values of map with the appropriate fn
 const regexpCallback = cb => cb instanceof RegExp ? cb.test.bind(cb) : cb;
+const callback = cb => (value, i, all, self) => regexpCallback(cb).call(self, value, i, all);
 const extend = (cb, self) => async (value, i, all) => ({
   value,
-  extra: await regexpCallback(cb).call(self, value, i, all)
+  extra: await callback(cb)(value, i, all, self)
 });
 const extraUp = ({ extra }) => extra;
 const valueUp = ({ value }) => value;
@@ -34,14 +35,15 @@ const extendArray = {
   // Check whether every method returns a truthy value
   every: async (obj, cb, self) => {
     for (let i = 0; i < obj.length; i++) {
-      const { value, extra } = await extend(cb, self)(obj[i], i, obj);
-      if (!extra) return false;
+      const found = await callback(cb)(obj[i], i, obj, self);
+      if (!found) return false;
     }
     return true;
   },
 
   // Convert to extended async map, filter on the extra and extract the value
   filter: async (obj, cb, self) => {
+    // We need to resolve it since it generates an array of promises
     const data = await resolve(obj.map(extend(cb, self)));
     return data.filter(extraUp).map(valueUp);
   },
@@ -49,19 +51,39 @@ const extendArray = {
   // Iterate over the array, one at a time
   find: async (obj, cb, self) => {
     for (let i = 0; i < obj.length; i++) {
-      const { value, extra } = await extend(cb, self)(obj[i], i, obj);
-      if (extra) return value;
+      const found = await callback(cb)(obj[i], i, obj, self);
+      if (found) return obj[i];
     }
   },
+
+  // Iterate over the array, one at a time
+  findIndex: async (obj, cb, self) => {
+    for (let i = 0; i < obj.length; i++) {
+      const found = await callback(cb)(obj[i], i, obj, self);
+      if (found) return i;
+    }
+    return -1;
+  },
+
+  forEach: async (obj, cb, self) => {
+    // We need to resolve it since it generates an array of promises
+    await resolve(obj.map(extend(cb, self)));
+    return obj;
+  },
+
+  // SKIP .map(), since it's the default that happens already
+
+  // reduce
+  // reduceRight
 
   // Check whether every method returns a truthy value
   some: async (obj, cb, self) => {
     for (let i = 0; i < obj.length; i++) {
-      const { value, extra } = await extend(cb, self)(obj[i], i, obj);
-      if (extra) return true;
+      const found = await callback(cb)(obj[i], i, obj, self);
+      if (found) return true;
     }
     return false;
-  },
+  }
 };
 
 
