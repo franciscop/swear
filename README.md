@@ -3,9 +3,11 @@
 A better way to deal with Javascript promises:
 
 ```js
-const rows = str => str.split('\n');
-const data = await swear([prom1, prom2]).map(rows).flat();
-console.log(data); // ['a', 'b', 'c', 'd']
+const name = await swear(fetch('/some.json')).json().user.name;
+console.log(name);  // Francisco
+
+const error = await swear(readFile('./error.log')).split('\n').pop();
+console.log(error);  // *latest error log message*
 ```
 
 Features:
