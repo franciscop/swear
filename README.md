@@ -57,6 +57,43 @@ console.log(name);
 ```
 
 
+
+### Number
+
+The [**Number documentation**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) explains the native API that is available. For instance, let's see with `.toFixed()`:
+
+```js
+// You could use `uwork` to do this in true parallel https://github.com/franciscop/uwork
+async function getPi() { /* ... */ }
+
+const pi = await swear(getPi()).toFixed(2);
+console.log(pi);  // 3.14
+```
+
+You can apply then other string operations as well, for instance you might want to extract some decimals:
+
+```js
+const decimals = await swear(getPi()).toFixed(3).split('.').pop();
+console.log(decimals);
+```
+
+
+
+### String
+
+The [**String documentation**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) explains the native API that is available. For instance, let's see with `.toFixed()`:
+
+```js
+// You could use `uwork` to do this in true parallel https://github.com/franciscop/uwork
+async function getCsv(url) { /* ... */ }
+
+const first = await swear(getCsv('/some.csv')).split('\n').shift().split(',');
+console.log(first);  // [a,1,6,z]
+```
+
+
+
+
 ### Array
 
 We are **extending** native arrays by adding **async** and **RegExp** methods to them:
@@ -87,29 +124,6 @@ For sync methods they behave the same way as the native counterparts. For `async
 - `.sort()`: **none**. This method is not modified and it does not accept an async callback.
 
 The ones called in series is because later iterations might depend on previous ones.
-
-
-
-### Number
-
-The [**Number documentation**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) explains the native API that is available. For instance, let's see with `.toFixed()`:
-
-```js
-// You could use `uwork` to do this in true parallel https://github.com/franciscop/uwork
-async function getPi() { /* ... */ }
-
-const pi = await swear(getPi()).toFixed(2);
-console.log(pi);  // 3.14
-```
-
-You can apply then other string operations as well, for instance you might want to extract some decimals:
-
-```js
-const decimals = await swear(getPi()).toFixed(3).split('.').pop();
-console.log(decimals);
-```
-
-
 
 
 
@@ -177,6 +191,20 @@ const getPi = uwork(function findPi(number = 10000) {
 // I got 4 cores, so start 4 simultaneous threads and average them:
 const parallel = [getPi(), getPi(), getPi(), getPi()];
 const pi = await swear(parallel).reduce((pi, part, i, all) => pi + part / all.length, 0);
+```
+
+
+
+## TODO
+
+It would be nice to have this API, but it's not planned for now:
+
+```js
+// Accept a function as the first argument and creates a new function
+const findAll = swear((...args) => {...}).map(a => a * 2);
+
+// When finally called, executes everything above
+const all = await findAll(...args);
 ```
 
 
