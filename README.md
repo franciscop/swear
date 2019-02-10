@@ -81,10 +81,10 @@ console.log(decimals);
 
 ### String
 
-The [**String documentation**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) explains the native API that is available. For instance, let's see with `.toFixed()`:
+The [**String documentation**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) explains the native API that is available. For instance, let's see with `.split()`:
 
 ```js
-// You could use `uwork` to do this in true parallel https://github.com/franciscop/uwork
+// Use fetch() or whatever internally
 async function getCsv(url) { /* ... */ }
 
 const first = await swear(getCsv('/some.csv')).split('\n').shift().split(',');
