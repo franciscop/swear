@@ -1,6 +1,6 @@
 # 🙏 Swear [![npm install swear](https://img.shields.io/badge/npm%20install-swear-blue.svg)](https://www.npmjs.com/package/swear)  [![status](https://circleci.com/gh/franciscop/swear.svg?style=shield)](https://circleci.com/gh/franciscop/swear) [![gzip size](https://img.badgesize.io/franciscop/swear/master/swear.min.js.svg?compression=gzip)](https://github.com/franciscop/swear/blob/master/swear.min.js)
 
-A better way to deal with Javascript promises:
+Flexible promise handling with Javascript:
 
 ```js
 const name = await swear(fetch('/some.json')).json().user.name;
@@ -12,11 +12,10 @@ console.log(error);  // *latest error log message*
 
 Features:
 
-- Extends **native Promises**; you can still treat them as normal with `await`, `.then()` and `.catch()`.
-- Automatic **Promise.all()** for arrays of promises.
-- **Chainable** interface that allows scripting syntax like jQuery.
-- Uses the **API of the JS object** so it's intuitive to follow.
-- Extends **Array functions** to make them async.
+- Extends **native Promises**; you can treat them as promises with `await`, `.then()` and `.catch()`.
+- Automatic **Promise.all()** for arrays.
+- **Chainable** interface that allows for a scripting syntax like jQuery.
+- Extends the **API of the Promise value** so it's intuitive to follow.
 
 See how `swear()` compares to native promises when you have some async operations:
 
@@ -33,16 +32,17 @@ value = value.filter(op2);
 value = await Promise.all(value.map(op3));
 ```
 
-Note that in the example above, `op2` has to be sync since the native `.filter()` cannot deal with an async one, but with `swear()` you can use async callbacks in `.filter()` as well! Keep reading 😄
+Note that in the example above, `op2` has to be sync since the native `.filter()` cannot deal with an async one, but with `swear()` you can do `.filter(async item => {...})` as well! Keep reading 😄
 
 
 
 ## API
 
-The coolest bit is that _you already know the API_ since it uses the native Javascript one! You can call the methods, properties, etc. of the value that you pass to swear() as you would do with native Javascript:
+The coolest bit is that _you already know the API_ since it uses the native Javascript one! You can call the methods, properties, etc. of the value that you pass to swear() as you would do normally:
 
 ```js
-const value = await swear(3.11).toFixed(1).split('.').map(n => n * 2).join('.');
+// No need for swear in this example, but isn't it cool?
+const value = await swear(getPi()).toFixed(1).split('.').map(n => n * 2).join('.');
 console.log(value); // 6.2 (string)
 
 const name = await swear(fetch('/some.json')).json().user.name;
@@ -59,15 +59,15 @@ console.log(name);
 
 ### Array
 
-We are **extending** native arrays by adding **async** and **RegExp**:
+We are **extending** native arrays by adding **async** and **RegExp** methods to them:
 
 ```js
 // It allows the .filter() callback to return a promise
 const value = await swear([0, 1, 2]).filter(async n => n * 2 < 2);
 console.log(value); // [0, 1]
 
-// It also accepts a raw Regular Expression for an array of strings
-const value = await swear(['a', 'b', 'C']).filter(/c/i);
+// It also accepts a Regular Expression for an array of strings
+const value = await swear(['a', 'b', 'C']).find(/c/i);
 console.log(value); // 'C'
 ```
 
@@ -86,7 +86,7 @@ For sync methods they behave the same way as the native counterparts. For `async
 - `.some()`: **series**, _"executes the callback function once for each element present in the array until it finds one where callback returns a truthy value"_ - [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some#Description).
 - `.sort()`: **none**. This method is not modified and it does not accept an async callback.
 
-The ones called in series is because we might halt the execution of successive iterations if a condition is met, so they can only be fulfilled in series.
+The ones called in series is because later iterations might depend on previous ones.
 
 
 
@@ -95,17 +95,17 @@ The ones called in series is because we might halt the execution of successive i
 The [**Number documentation**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number) explains the native API that is available. For instance, let's see with `.toFixed()`:
 
 ```js
-// You could use `uwork` to do this in the background https://github.com/franciscop/uwork
-async function calculatePi() { /* ... */ }
+// You could use `uwork` to do this in true parallel https://github.com/franciscop/uwork
+async function getPi() { /* ... */ }
 
-const pi = await swear(calculatePi()).toFixed(2);
+const pi = await swear(getPi()).toFixed(2);
 console.log(pi);  // 3.14
 ```
 
 You can apply then other string operations as well, for instance you might want to extract some decimals:
 
 ```js
-const decimals = await swear(calculatePi()).toFixed(3).split('.').pop();
+const decimals = await swear(getPi()).toFixed(3).split('.').pop();
 console.log(decimals);
 ```
 
@@ -126,11 +126,11 @@ const files = await swear(readdir(__dirname)).map(file => readFile(file, 'utf-8'
 // NATIVE; this is how you'd have to do with vanilla JS
 const files = await readdir(__dirname).then(files => files.map(file => readFile(file, 'utf-8')));
 
-// PRO; using my library `files`, based on swear, it gets better:
+// PRO-TIP; using my library `files`, based on swear, it gets better:
 const files = await dir(__dirname).map(read);
 ```
 
-Retrieve a bunch of websites with valid responses
+Retrieve a bunch of websites with valid responses:
 
 ```js
 // Retrieve the content of several pages
@@ -160,13 +160,32 @@ const sum = await swear(got('example.com/data.csv'))
   .reduce((total, num) => total + num, 0);
 ```
 
+Calculate pi in true parallel with [Monte Carlo Method](https://en.wikipedia.org/wiki/Monte_Carlo_method) and [`uwork`](https://github.com/franciscop/uwork):
+
+```js
+// Create the piece of work to be performed
+const getPi = uwork(function findPi(number = 10000) {
+  let inside = 0;
+  for (let i = 0; i < number; i++) {
+    // Not a good random method http://www.playchilla.com/random-direction-in-2d
+    let x = Math.random(), y = Math.random();
+    if (x * x + y * y <= 1) inside++;
+  }
+  return 4 * inside / number;
+});
+
+// I got 4 cores, so start 4 simultaneous threads and average them:
+const parallel = [getPi(), getPi(), getPi(), getPi()];
+const pi = await swear(parallel).reduce((pi, part, i, all) => pi + part / all.length, 0);
+```
+
 
 
 ## Acknowledgements
 
 Libraries based on this:
 
-- [`atocha`](https://npmjs.com/package/atocha): run a command in your terminal.
-- [`create-static-web`](https://npmjs.com/package/create-static-web) another static site generator.
+- [`atocha`](https://npmjs.com/package/atocha): run terminal commands from Node.js.
+- [`create-static-web`](https://npmjs.com/package/create-static-web): another static site generator.
 - [`fch`](https://www.npmjs.com/package/fch): an improved version of fetch().
 - [`files`](https://npmjs.com/package/files): Node.js filesystem API easily usable with Promises and arrays.

@@ -1,7 +1,7 @@
 {
   "name": "swear",
   "version": "1.0.0",
-  "description": "✨ Simplify dealing with promises for async-heavy situations",
+  "description": "🙏 Flexible promise handling with Javascript",
   "main": "swear.min.js",
   "scripts": {
     "build": "rollup swear.js --name swear --output.format umd | uglifyjs -o swear.min.js",

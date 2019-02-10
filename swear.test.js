@@ -1,6 +1,6 @@
 import swear from './swear';
 
-const wait = time => new Promise(ok => setTimeout(ok, 100));
+const wait = (time = 10) => new Promise(ok => setTimeout(ok, time));
 
 
 
@@ -148,11 +148,11 @@ describe('promises', () => {
 
     // Sanity check
     new Promise(ok => called.push('a'));
-    await wait(100);
+    await wait();
     expect(called).toEqual(['a']);
 
     swear(['b']).map(it => called.push(it));
-    await wait(100);
+    await wait();
     expect(called).toEqual(['a', 'b']);
   });
 });
@@ -212,7 +212,7 @@ describe('arrays', () => {
     return a > this;
   };
   const compareAsync = async function (a) {
-    await wait(10);
+    await wait();
     return a > this;
   };
 
@@ -255,12 +255,12 @@ describe('arrays', () => {
       expect(await swear([1, 2, 3]).every(compare, 2)).toEqual(false);
     });
 
-    it('can do a regexp filter', async () => {
+    it('can do a regexp every', async () => {
       expect(await swear(['a', 'b', 'c']).every(/(a|b|c)/)).toEqual(true);
       expect(await swear(['a', 'b', 'c']).every(/(b|c)/)).toEqual(false);
     });
 
-    it('can do an async filter', async () => {
+    it('can do an async every', async () => {
       expect(await swear([1, 2, 3]).every(async a => a > 0)).toEqual(true);
       expect(await swear([1, 2, 3]).every(async a => a > 1)).toEqual(false);
     });
@@ -269,23 +269,23 @@ describe('arrays', () => {
       let count = 0;
       expect(await swear([1, 2, 3]).every(async a => {
         count++;
-        await wait(10);
+        await wait();
         return a !== 1;
       }));
       expect(count).toBe(1);
     });
 
-    it('maintains this on an async filter', async () => {
+    it('maintains this on an async every', async () => {
       expect(await swear([1, 2, 3]).every(compareAsync, 0)).toEqual(true);
       expect(await swear([1, 2, 3]).every(compareAsync, 1)).toEqual(false);
     });
 
-    it('can do an async filter after chaining it', async () => {
+    it('can do an async every after chaining it', async () => {
       expect(await swear([1, 2, 3]).map(async a => a**2).every(async a => a > 0)).toEqual(true);
       expect(await swear([1, 2, 3]).map(async a => a**2).every(async a => a > 3)).toEqual(false);
     });
 
-    it('has all the right params for filter', async () => {
+    it('has all the right params for every', async () => {
       await swear([0, 1, 2]).every(async (a, i, all) => {
         expect(a).toEqual(i);
         expect(all).toEqual([0, 1, 2]);
@@ -366,7 +366,7 @@ describe('arrays', () => {
       let count = 0;
       expect(await swear([1, 2, 3]).find(async a => {
         count++;
-        await wait(10);
+        await wait();
         return a === 1;
       }));
       expect(count).toBe(1);
@@ -417,7 +417,7 @@ describe('arrays', () => {
       let count = 0;
       expect(await swear([1, 2, 3]).findIndex(async a => {
         count++;
-        await wait(10);
+        await wait();
         return a === 1;
       }));
       expect(count).toBe(1);
@@ -475,6 +475,106 @@ describe('arrays', () => {
     });
   });
 
+  describe('.reduce()', () => {
+    it('can do a simple reduce', async () => {
+      expect(await swear([1, 2, 3]).reduce((a, b) => a + b)).toEqual(6);
+      expect(await swear([1, 2, 3]).reduce((a, b) => a + b, 0)).toEqual(6);
+    });
+
+    // Init is by reference, see https://jsfiddle.net/franciscop/1bdsxonp/2/
+    it('passes the init by reference', async () => {
+      const init = { a: 0 };
+      await swear([1, 2, 3]).reduce((init, b) => {
+        init.a++;
+        return init;
+      }, init);
+      expect(init.a).toBe(3);
+    });
+
+    it('can do a simple async', async () => {
+      expect(await swear([1, 2, 3]).reduce(async (a, b) => a + b)).toEqual(6);
+      expect(await swear([1, 2, 3]).reduce(async (a, b) => a + b, 0)).toEqual(6);
+    });
+
+    // Init is by reference, see https://jsfiddle.net/franciscop/1bdsxonp/2/
+    it('passes the init by reference on async', async () => {
+      const init = { a: 0 };
+      await swear([1, 2, 3]).reduce(async (init, b) => {
+        init.a++;
+        await wait();
+        return init;
+      }, init);
+      expect(init.a).toBe(3);
+    });
+
+    it('can do an async reduce and chain it', async () => {
+      expect(await swear([1, 2, 3]).reduce(async (a, b) => a + b).toFixed(0)).toEqual('6');
+    });
+
+    it('can do an async reduce after chaining it', async () => {
+      expect(await swear([1, 2, 3]).map(async a => a**2).reduce(async (a, b) => a + b)).toEqual(14);
+    });
+
+    it('has all the right params for reduce', async () => {
+      await swear([0, 1, 2]).reduce(async (init, a, i, all) => {
+        expect(init).toEqual({ a: 'b' });
+        expect(a).toEqual(i);
+        expect(all).toEqual([0, 1, 2]);
+        return init;
+      }, { a: 'b' });
+    });
+  });
+
+  describe('.reduceRight()', () => {
+    it('can do a simple reduceRight', async () => {
+      expect(await swear([1, 2, 3]).reduceRight((a, b) => a + b)).toEqual(6);
+      expect(await swear([1, 2, 3]).reduceRight((a, b) => a + b, 0)).toEqual(6);
+    });
+
+    // Init is by reference, see https://jsfiddle.net/franciscop/1bdsxonp/2/
+    it('passes the init by reference', async () => {
+      const init = { a: 0 };
+      await swear([1, 2, 3]).reduceRight((init, b) => {
+        init.a++;
+        return init;
+      }, init);
+      expect(init.a).toBe(3);
+    });
+
+    it('can do a simple async', async () => {
+      expect(await swear([1, 2, 3]).reduceRight(async (a, b) => a + b)).toEqual(6);
+      expect(await swear([1, 2, 3]).reduceRight(async (a, b) => a + b, 0)).toEqual(6);
+    });
+
+    // Init is by reference, see https://jsfiddle.net/franciscop/1bdsxonp/2/
+    it('passes the init by reference on async', async () => {
+      const init = { a: 0 };
+      await swear([1, 2, 3]).reduceRight(async (init, b) => {
+        init.a++;
+        await wait();
+        return init;
+      }, init);
+      expect(init.a).toBe(3);
+    });
+
+    it('can do an async reduceRight and chain it', async () => {
+      expect(await swear([1, 2, 3]).reduceRight(async (a, b) => a + b).toFixed(0)).toEqual('6');
+    });
+
+    it('can do an async reduceRight after chaining it', async () => {
+      expect(await swear([1, 2, 3]).map(async a => a**2).reduceRight(async (a, b) => a + b)).toEqual(14);
+    });
+
+    it('has all the right params for reduceRight', async () => {
+      await swear([0, 1, 2]).reduceRight(async (init, a, i, all) => {
+        expect(init).toEqual({ a: 'b' });
+        expect(a).toEqual(i);
+        expect(all).toEqual([0, 1, 2]);
+        return init;
+      }, { a: 'b' });
+    });
+  });
+
   describe('.some()', () => {
     it('can do the simple operation', async () => {
       expect(await swear([]).some(a => a > 0)).toEqual(false);
@@ -501,7 +601,7 @@ describe('arrays', () => {
       let count = 0;
       expect(await swear([1, 2, 3]).some(async a => {
         count++;
-        await wait(10);
+        await wait();
         return a === 1;
       }));
       expect(count).toBe(1);
@@ -550,55 +650,50 @@ describe('objects', () => {
 
 
 
-describe.skip('options', () => {
+describe('extend', () => {
+  const double = obj => obj + obj;
+  const doubleArray = obj => obj.map(double);
 
   it('can accept no options', async () => {
     await swear('a');
+      await swear('a', {});
   });
 
-  it('can accept empty options object', async () => {
-    await swear('a', {});
+  it('can extend anything', async () => {
+    const opts = { double };
+    expect(await swear(1, opts).double()).toEqual(2);
+    expect(await swear('a', opts).double()).toEqual('aa');
   });
 
-  it('rejects other option types', async () => {
-    const errMatch = { message: /invalid options/ };
-    await expect(swear('a', 10).map(a => a)).rejects.toMatchObject(errMatch);
+  it('can extend numbers', async () => {
+    const opts = { number: { double } };
+    expect(await swear(1, opts).double()).toEqual(2);
   });
 
+  it('can extend strings', async () => {
+    const opts = { string: { double } };
+    expect(await swear('a', opts).double()).toEqual('aa');
+  });
 
+  it('can extend arrays', async () => {
+    const opts = { array: { double: doubleArray } };
+    expect(await swear([1], opts).double()).toEqual([2]);
+    expect(await swear(['a'], opts).double()).toEqual(['aa']);
+  });
 
-  describe('extend', () => {
-    const double = function () {
-      if (Array.isArray(this)) return this.map(a => a + a);
-      return this + this;
-    };
+  it('can be extended later in the chain', async () => {
+    const opts = { array: { double: doubleArray } };
+    expect(await swear(['a'], opts).map(a => a).double()).toEqual(['aa']);
+  });
 
-    it('can be extended', async () => {
-      const opts = { extend: { double } };
-      expect(await swear('a', opts).double()).toEqual('aa');
-      expect(await swear(['a'], opts).double()).toEqual(['aa']);
-    });
+  it('returns the proper instance', async () => {
+    const opts = { array: { double: doubleArray } };
+    expect(await swear(['a'], opts).double().map(a => a)).toEqual(['aa']);
+  });
 
-    it('can be extended later in the chain', async () => {
-      const opts = { extend: { double } };
-      expect(await swear('a', opts).slice(0, 1).double()).toEqual('aa');
-      expect(await swear(['a'], opts).map(a => a).double()).toEqual(['aa']);
-    });
-
-    it('returns the proper instance', async () => {
-      const opts = { extend: { double } };
-      expect(await swear('a', opts).double().slice(0, 2)).toEqual('aa');
-      expect(await swear(['a'], opts).double().map(a => a)).toEqual(['aa']);
-    });
-
-    it('can do a complex extension', async () => {
-      const extend = {
-        abc: function (...args) {
-          return Promise.resolve('a' + this.join('') + args.join('') + 'f');
-        }
-      };
-      expect(await swear(['b', 'c'], { extend }).map(a => a).abc('d', 'e')).toBe('abcdef');
-    });
+  it('has the right arguments', async () => {
+    const array = { abc: (obj, ...args) => 'a' + obj.join('') + args.join('') + 'f' };
+    expect(await swear(['b', 'c'], { array }).map(a => a).abc('d', 'e')).toBe('abcdef');
   });
 });
 
@@ -607,37 +702,30 @@ describe.skip('options', () => {
 
 
 
-describe.skip('examples', () => {
+describe('examples', () => {
   describe('DB library', () => {
-    const DB = opts => {
+    const db = (() => {
       const users = [
-        {id: 0, name: 'Maria', address: { city: 'London' }},
-        {id: 1, name: 'John', address: { city: 'London' }}
+        { id: 0, name: 'Maria', address: { city: 'London' }},
+        { id: 1, name: 'John', address: { city: 'London' }}
       ];
       const courses = [];
-      const tables = { users, courses };
 
-      const table = function (name) {
-        if (!this[name]) throw new Error(`Table ${name} not found`);
-        return this[name];
-      };
-      const find = function (filter) {
+      const find = function (obj, filter) {
         const [key, value] = Object.entries(filter)[0];
-        const result = this.find(obj => obj[key] === value);
+        const result = obj.find(obj => obj[key] === value);
         if (!result) throw new Error(`Item not found for the filter ${filter}`);
-        return this.find(obj => obj[key] === value);
+        return obj.find(obj => obj[key] === value);
       };
-      const extend = { table, find };
 
-      return swear(tables, { extend });
-    };
+      return swear({ users, courses }, { find });
+    })();
 
     it('can be initialized', async () => {
-      const db = DB();
-      const name = await db.table('users').find({ id: 1 }).name;
+      const name = await db.users.find({ id: 1 }).name;
       expect(name).toEqual('John');
 
-      const city = await db.table('users').find({ id: 1 }).address.city;
+      const city = await db.users.find({ id: 1 }).address.city;
       expect(city).toEqual('London');
     });
   });
