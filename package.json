@@ -1,6 +1,6 @@
 {
   "name": "swear",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "🙏 Flexible promise handling with Javascript",
   "main": "swear.min.js",
   "scripts": {
