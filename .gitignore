@@ -1,3 +1,6 @@
+# Should not commit for packages
+package-lock.json
+
 # Logs
 logs
 *.log
