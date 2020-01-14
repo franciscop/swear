@@ -2,11 +2,16 @@
   "name": "swear",
   "version": "1.0.1",
   "description": "🙏 Flexible promise handling with Javascript",
-  "main": "swear.min.js",
+  "homepage": "https://github.com/franciscop/swear#readme",
+  "repository": "https://github.com/franciscop/swear.git",
+  "bugs": "https://github.com/franciscop/swear/issues",
+  "funding": "https://www.paypal.me/franciscopresencia/19",
+  "author": "Francisco Presencia <public@francisco.io> (https://francisco.io/)",
+  "license": "MIT",
   "scripts": {
-    "build": "rollup swear.js --name swear --output.format umd | uglifyjs -o swear.min.js",
+    "build": "rollup src/index.js --name swear --output.format umd | uglifyjs -o index.min.js",
     "gzip": "echo $(gzip -c swear.min.js | wc -c) bytes",
-    "test": "npm run build && jest --coverage",
+    "test": "jest --coverage",
     "watch": "jest --watch"
   },
   "keywords": [
@@ -19,19 +24,8 @@
     "map",
     "filter"
   ],
-  "files": [
-    "swear.js"
-  ],
-  "author": "Francisco Presencia <public@francisco.io> (https://francisco.io/)",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/franciscop/swear.git"
-  },
-  "bugs": {
-    "url": "https://github.com/franciscop/swear/issues"
-  },
-  "homepage": "https://github.com/franciscop/swear#readme",
+  "main": "swear.min.js",
+  "files": [],
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-jest": "^21.2.0",
@@ -39,5 +33,8 @@
     "jest": "^23.5.0",
     "rollup": "^1.1.2",
     "uglify-es": "^3.3.9"
+  },
+  "babel": {
+    "presets": ["env"]
   }
 }
