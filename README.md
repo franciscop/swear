@@ -1,4 +1,4 @@
-# 🙏 Swear [![npm install swear](https://img.shields.io/badge/npm%20install-swear-blue.svg)](https://www.npmjs.com/package/swear)  [![test badge](https://github.com/franciscop/files/workflows/swear/badge.svg)](https://github.com/franciscop/files/blob/master/.github/workflows/swear.yml) [![gzip size](https://img.badgesize.io/franciscop/swear/master/index.min.js.svg?compression=gzip)](https://github.com/franciscop/swear/blob/master/index.min.js)
+# 🙏 Swear [![npm install swear](https://img.shields.io/badge/npm%20install-swear-blue.svg)](https://www.npmjs.com/package/swear)  [![test badge](https://github.com/franciscop/swear/workflows/tests/badge.svg)](https://github.com/franciscop/swear/blob/master/.github/workflows/tests.yml) [![gzip size](https://img.badgesize.io/franciscop/swear/master/index.min.js.svg?compression=gzip)](https://github.com/franciscop/swear/blob/master/index.min.js)
 
 Flexible promise handling with Javascript:
 
