@@ -24,7 +24,7 @@
     "map",
     "filter"
   ],
-  "main": "swear.min.js",
+  "main": "index.min.js",
   "files": [],
   "devDependencies": {
     "babel-core": "^6.26.0",
