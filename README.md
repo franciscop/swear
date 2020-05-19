@@ -16,6 +16,7 @@ Features:
 - Automatic **Promise.all()** for arrays.
 - **Chainable** interface that allows for a scripting syntax like jQuery.
 - Extends the **API of the Promise value** so it's intuitive to follow.
+- Can transparently wrap an async function to make it use swear().
 
 See how `swear()` compares to native promises when you have some async operations:
 
@@ -91,6 +92,21 @@ const first = await swear(getCsv('/some.csv')).split('\n').shift().split(',');
 console.log(first);  // [a,1,6,z]
 ```
 
+
+
+### Function
+
+If you pass a function, swear will return a function that, when called, will return a swear instance. It transparently passes the arguments (resolving them if needed!) and resolves with the returned value:
+
+```js
+const getSomeInfo = swear(async () => {
+  ...
+});
+
+const names = getSomeInfo('users.json').map(user => user.name).join(',');
+```
+
+This is great if you want to write a library with swear; it will behave the same as the async version when treated like such; but has a lot of new useful functionality from the underlying values.
 
 
 

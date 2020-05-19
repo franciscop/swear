@@ -281,6 +281,37 @@ describe("strings", () => {
   });
 });
 
+describe("functions", () => {
+  it("initializes with a fn", async () => {
+    expect(typeof (await swear(() => {}))).toBe("function");
+  });
+
+  it("can perform a single operation", async () => {
+    const fn = swear(() => "Hello world");
+    expect(await fn().slice(0, 5)).toEqual("Hello");
+  });
+
+  it("accepts and returns the arguments", async () => {
+    const fn = swear(a => a.split(" "));
+    expect(await fn("Hello world")).toEqual(["Hello", "world"]);
+  });
+
+  it("can handle promises", async () => {
+    const fn = swear(async a => {
+      return a.split(" ");
+    });
+    expect(await fn("Hello world")).toEqual(["Hello", "world"]);
+  });
+
+  it("resolves the arguments before calling the fn", async () => {
+    const fn = swear(a => a.split(" "));
+    expect(await fn(Promise.resolve("Hello world"))).toEqual([
+      "Hello",
+      "world"
+    ]);
+  });
+});
+
 describe("arrays", () => {
   const compare = function(a) {
     return a > this;

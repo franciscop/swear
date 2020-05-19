@@ -193,8 +193,11 @@ const func = (obj, extend) =>
   });
 
 // ROOT: it can be called only with a getter like `obj.op1()` or `obj.name`
-const root = (obj, { number, string, array, ...others } = {}) =>
-  new Proxy(
+const root = (obj, { number, string, array, ...others } = {}) => {
+  if (typeof obj === "function") {
+    return (...args) => root(Promise.all(args).then(args => obj(...args)));
+  }
+  return new Proxy(
     {},
     {
       get: getter(obj, {
@@ -205,5 +208,6 @@ const root = (obj, { number, string, array, ...others } = {}) =>
       })
     }
   );
+};
 
 export default root;
