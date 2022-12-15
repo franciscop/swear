@@ -5,7 +5,7 @@
 // const log = console.log.bind(global);
 
 // Resolve a bit recursively
-const resolve = async value => {
+const resolve = async (value) => {
   // log('RESOLVING', value);
   value = await value;
   if (Array.isArray(value)) {
@@ -14,15 +14,17 @@ const resolve = async value => {
   return value;
 };
 
-const reject = message => Promise.reject(new Error(message));
+const reject = (message) => Promise.reject(new Error(message));
 
 // Extend each of the values of map with the appropriate fn
-const regexpCallback = cb => (cb instanceof RegExp ? cb.test.bind(cb) : cb);
-const callback = (cb, self) => (...args) =>
-  regexpCallback(cb).call(self, ...args);
+const regexpCallback = (cb) => (cb instanceof RegExp ? cb.test.bind(cb) : cb);
+const callback =
+  (cb, self) =>
+  (...args) =>
+    regexpCallback(cb).call(self, ...args);
 const extend = (cb, self) => async (value, i, all) => ({
   value,
-  extra: await callback(cb, self)(value, i, all)
+  extra: await callback(cb, self)(value, i, all),
 });
 const extraUp = ({ extra }) => extra;
 const valueUp = ({ value }) => value;
@@ -98,7 +100,7 @@ const extendArray = {
       if (found) return true;
     }
     return false;
-  }
+  },
 };
 
 // For Proxy's { get } trap (property access)
@@ -118,14 +120,14 @@ const getter = (obj, extend) => (target, key) => {
     return (...args) => {
       // log('GETTER CATCH', obj, ...args);
       // if (name === 'catch') return (...args) => play(prom.catch(...args), extend);
-      // We need the root() because we want to allow for catch() to continue working
+      // We need the swear() because we want to allow for catch() to continue working
       //   like this: .map().catch().filter(). Without it, we end this bit.
-      return root(resolve(obj).catch(...args));
+      return swear(resolve(obj).catch(...args));
     };
 
   // Wrap it in a resolution so promises are first-class values
   return func(
-    resolve(obj).then(obj => {
+    resolve(obj).then((obj) => {
       // Some times it will ask for Symbol; just return a low-key value
       if (typeof key === "symbol") return obj[key];
 
@@ -171,7 +173,7 @@ const applier = (obj, extend) => (target, self, args) => {
 
   // Wrap it in a resolution so promises are first-class values
   return func(
-    resolve(obj).then(obj => {
+    resolve(obj).then((obj) => {
       if (typeof obj !== "function") {
         return reject(
           `You tried to call "${JSON.stringify(
@@ -189,13 +191,17 @@ const applier = (obj, extend) => (target, self, args) => {
 const func = (obj, extend) =>
   new Proxy(() => {}, {
     get: getter(obj, extend),
-    apply: applier(obj, extend)
+    apply: applier(obj, extend),
   });
 
 // ROOT: it can be called only with a getter like `obj.op1()` or `obj.name`
-const root = (obj, { number, string, array, ...others } = {}) => {
+export default swear = (obj, { number, string, array, ...others } = {}) => {
   if (typeof obj === "function") {
-    return (...args) => root(Promise.all(args).then(args => obj(...args)));
+    return (...args) =>
+      swear(
+        Promise.all(args).then((args) => obj(...args)),
+        { number, string, array, ...others }
+      );
   }
   return new Proxy(
     {},
@@ -204,10 +210,8 @@ const root = (obj, { number, string, array, ...others } = {}) => {
         number: { ...number },
         string: { ...string },
         array: { ...extendArray, ...array },
-        ...others
-      })
+        ...others,
+      }),
     }
   );
 };
-
-export default root;

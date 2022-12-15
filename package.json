@@ -9,10 +9,11 @@
   "author": "Francisco Presencia <public@francisco.io> (https://francisco.io/)",
   "license": "MIT",
   "scripts": {
-    "build": "rollup src/index.js --name swear --output.format umd | uglifyjs -o index.min.js",
-    "gzip": "echo $(gzip -c swear.min.js | wc -c) bytes",
-    "test": "jest --coverage",
-    "watch": "jest --watch"
+    "build": "terser --compress --mangle --toplevel -o ./index.min.js -- ./index.js",
+    "size": "echo $(gzip -c fetch.min.js | wc -c) bytes",
+    "start": "npm run watch # Start ~= Start dev",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --detectOpenHandles",
+    "watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch --coverage --detectOpenHandles"
   },
   "keywords": [
     "promise",
@@ -25,18 +26,16 @@
     "filter"
   ],
   "main": "index.min.js",
+  "type": "module",
   "files": [],
+  "dependencies": {},
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-jest": "^21.2.0",
-    "babel-preset-env": "^1.7.0",
-    "jest": "^23.5.0",
-    "rollup": "^1.1.2",
-    "uglify-es": "^3.3.9"
+    "jest": "^28.0.1",
+    "jest-fetch-mock": "^3.0.3",
+    "terser": "^5.13.1"
   },
-  "babel": {
-    "presets": [
-      "env"
-    ]
+  "jest": {
+    "testEnvironment": "jest-environment-node",
+    "transform": {}
   }
 }
