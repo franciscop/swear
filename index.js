@@ -195,7 +195,7 @@ const func = (obj, extend) =>
   });
 
 // ROOT: it can be called only with a getter like `obj.op1()` or `obj.name`
-export default swear = (obj, { number, string, array, ...others } = {}) => {
+export default function swear(obj, { number, string, array, ...others } = {}) {
   if (typeof obj === "function") {
     return (...args) =>
       swear(
@@ -214,4 +214,4 @@ export default swear = (obj, { number, string, array, ...others } = {}) => {
       }),
     }
   );
-};
+}
