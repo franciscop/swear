@@ -1,24 +1,24 @@
 name: tests
 
-on: [push]
+on:
+  push:
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [14.x, 16.x, 18.x]
-
     steps:
-      - uses: actions/checkout@v1
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: install dependencies
-        run: npm install
-      - name: npm test
-        run: npm test
+      - uses: actions/checkout@v6
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v1
+      - name: Install dependencies
+        run: bun install
+      - name: Build it
+        run: bun run build
+      - name: Run the linter
+        run: bun run lint
+      - name: Run the tests
+        run: bun test
         env:
           CI: true

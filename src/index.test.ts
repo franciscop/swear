@@ -1,3 +1,5 @@
+import { describe, expect, it } from "bun:test";
+
 import swear from "./index.js";
 
 const wait = (time = 10) => new Promise((ok) => setTimeout(ok, time));
@@ -20,11 +22,11 @@ describe("promises", () => {
   });
 
   it("can retrieve simple items", async () => {
-    expect(await swear([true])[0]).toBe(true);
-    expect(await swear([3])[0]).toBe(3);
-    expect(await swear(["a"])[0]).toBe("a");
-    expect(await swear([[]])[0]).toEqual([]);
-    expect(await swear([{}])[0]).toEqual({});
+    expect(await (swear([true]) as any)[0]).toBe(true);
+    expect(await (swear([3]) as any)[0]).toBe(3);
+    expect(await (swear(["a"]) as any)[0]).toBe("a");
+    expect(await (swear([[]]) as any)[0]).toEqual([]);
+    expect(await (swear([{}]) as any)[0]).toEqual({});
   });
 
   it("can call a function", async () => {
@@ -36,87 +38,53 @@ describe("promises", () => {
   });
 
   it("can chain ad infinitum", async () => {
-    expect(
-      await swear([true])
-        .map((a) => a)
-        .map((a) => a)
-        .map((a) => a)
-    ).toEqual([true]);
-    expect(
-      await swear([3])
-        .map((a) => a)
-        .map((a) => a)
-        .map((a) => a)
-    ).toEqual([3]);
-    expect(
-      await swear(["a"])
-        .map((a) => a)
-        .map((a) => a)
-        .map((a) => a)
-    ).toEqual(["a"]);
-    expect(
-      await swear([[]])
-        .map((a) => a)
-        .map((a) => a)
-        .map((a) => a)
-    ).toEqual([[]]);
-    expect(
-      await swear([{}])
-        .map((a) => a)
-        .map((a) => a)
-        .map((a) => a)
-    ).toEqual([{}]);
+    expect(await swear([true]).map((a) => a).map((a) => a).map((a) => a)).toEqual([true]);
+    expect(await swear([3]).map((a) => a).map((a) => a).map((a) => a)).toEqual([3]);
+    expect(await swear(["a"]).map((a) => a).map((a) => a).map((a) => a)).toEqual(["a"]);
+    expect(await swear([[]]).map((a) => a).map((a) => a).map((a) => a)).toEqual([[]]);
+    expect(await swear([{}]).map((a) => a).map((a) => a).map((a) => a)).toEqual([{}]);
   });
 
   it("can retrieve a property after a function", async () => {
-    expect(await swear([true]).map((a) => a)[0]).toBe(true);
-    expect(await swear([3]).map((a) => a)[0]).toBe(3);
-    expect(await swear(["a"]).map((a) => a)[0]).toBe("a");
-    expect(await swear([[]]).map((a) => a)[0]).toEqual([]);
-    expect(await swear([{}]).map((a) => a)[0]).toEqual({});
+    expect(await (swear([true]).map((a) => a) as any)[0]).toBe(true);
+    expect(await (swear([3]).map((a) => a) as any)[0]).toBe(3);
+    expect(await (swear(["a"]).map((a) => a) as any)[0]).toBe("a");
+    expect(await (swear([[]]).map((a) => a) as any)[0]).toEqual([]);
+    expect(await (swear([{}]).map((a) => a) as any)[0]).toEqual({});
   });
 
   it("cannot call a function response", async () => {
     const message = /You tried to call the non-function/;
-    await expect(swear([true]).map((a) => a)((a) => a)).rejects.toMatchObject({
-      message,
-    });
-    await expect(swear([3]).map((a) => a)((a) => a)).rejects.toMatchObject({
-      message,
-    });
-    await expect(swear(["a"]).map((a) => a)((a) => a)).rejects.toMatchObject({
-      message,
-    });
-    await expect(swear([[]]).map((a) => a)((a) => a)).rejects.toMatchObject({
-      message,
-    });
-    await expect(swear([{}]).map((a) => a)((a) => a)).rejects.toMatchObject({
-      message,
-    });
+    const wrap = (v: any) => Promise.resolve(v);
+    await expect(wrap((swear([true]).map((a) => a) as any)((a: any) => a))).rejects.toThrow(message);
+    await expect(wrap((swear([3]).map((a) => a) as any)((a: any) => a))).rejects.toThrow(message);
+    await expect(wrap((swear(["a"]).map((a) => a) as any)((a: any) => a))).rejects.toThrow(message);
+    await expect(wrap((swear([[]]).map((a) => a) as any)((a: any) => a))).rejects.toThrow(message);
+    await expect(wrap((swear([{}]).map((a) => a) as any)((a: any) => a))).rejects.toThrow(message);
   });
 
   it("can retrieve nested items", async () => {
-    expect(await swear([[true]])[0][0]).toBe(true);
-    expect(await swear([[3]])[0][0]).toBe(3);
-    expect(await swear([["a"]])[0][0]).toBe("a");
-    expect(await swear([[[]]])[0][0]).toEqual([]);
-    expect(await swear([[{}]])[0][0]).toEqual({});
+    expect(await (swear([[true]]) as any)[0][0]).toBe(true);
+    expect(await (swear([[3]]) as any)[0][0]).toBe(3);
+    expect(await (swear([["a"]]) as any)[0][0]).toBe("a");
+    expect(await (swear([[[]]])[0] as any)[0]).toEqual([]);
+    expect(await (swear([[{}]])[0] as any)[0]).toEqual({});
   });
 
   it("can call a function after a property", async () => {
-    expect(await swear([[true]])[0].map((a) => a)).toEqual([true]);
-    expect(await swear([[3]])[0].map((a) => a)).toEqual([3]);
-    expect(await swear([["a"]])[0].map((a) => a)).toEqual(["a"]);
-    expect(await swear([[[]]])[0].map((a) => a)).toEqual([[]]);
-    expect(await swear([[{}]])[0].map((a) => a)).toEqual([{}]);
+    expect(await (swear([[true]]) as any)[0].map((a: any) => a)).toEqual([true]);
+    expect(await (swear([[3]]) as any)[0].map((a: any) => a)).toEqual([3]);
+    expect(await (swear([["a"]]) as any)[0].map((a: any) => a)).toEqual(["a"]);
+    expect(await (swear([[[]]])[0] as any).map((a: any) => a)).toEqual([[]]);
+    expect(await (swear([[{}]])[0] as any).map((a: any) => a)).toEqual([{}]);
   });
 
   it("can combine prop => func => prop", async () => {
-    expect(await swear([[true]])[0].map((a) => a)[0]).toBe(true);
-    expect(await swear([[3]])[0].map((a) => a)[0]).toBe(3);
-    expect(await swear([["a"]])[0].map((a) => a)[0]).toBe("a");
-    expect(await swear([[[]]])[0].map((a) => a)[0]).toEqual([]);
-    expect(await swear([[{}]])[0].map((a) => a)[0]).toEqual({});
+    expect(await ((swear([[true]]) as any)[0].map((a: any) => a) as any)[0]).toBe(true);
+    expect(await ((swear([[3]]) as any)[0].map((a: any) => a) as any)[0]).toBe(3);
+    expect(await ((swear([["a"]]) as any)[0].map((a: any) => a) as any)[0]).toBe("a");
+    expect(await ((swear([[[]]])[0] as any).map((a: any) => a) as any)[0]).toEqual([]);
+    expect(await ((swear([[{}]])[0] as any).map((a: any) => a) as any)[0]).toEqual({});
   });
 
   it("resolves typeof as expected", async () => {
@@ -135,93 +103,50 @@ describe("promises", () => {
 
   it("resolves instances as expected", async () => {
     expect((await swear(new Date())) instanceof Date).toBe(true);
-    expect((await swear(new Date())) instanceof Date).toBe(true); // same as above
+    expect((await swear(new Date())) instanceof Date).toBe(true);
     expect(Array.isArray(await swear([3]))).toBe(true);
   });
 
   it("can catch a root error", async () => {
-    expect(await swear(Promise.reject().catch((err) => "Hello"))).toEqual(
-      "Hello"
-    );
-    expect(await swear(Promise.reject()).catch((err) => "Hello")).toEqual(
-      "Hello"
-    );
+    expect(await swear(Promise.reject().catch(() => "Hello"))).toEqual("Hello");
+    expect(await swear(Promise.reject()).catch(() => "Hello")).toEqual("Hello");
   });
 
   it("continues the chain after .catch()", async () => {
-    expect(await swear(Promise.resolve("abc")).split("")).toEqual([
-      "a",
-      "b",
-      "c",
-    ]);
-    expect(await swear(Promise.resolve("abc")).split("")).toEqual([
-      "a",
-      "b",
-      "c",
-    ]);
-    expect(await swear(Promise.resolve("abc")).split("")).toEqual([
-      "a",
-      "b",
-      "c",
-    ]);
-    expect(await swear(Promise.reject("Hello")).catch((err) => err)).toEqual(
-      "Hello"
-    );
-    expect(await swear(Promise.reject("Hello")).catch((err) => "a b")).toEqual(
-      "a b"
-    );
-    expect(
-      typeof swear(Promise.reject("Hello")).catch((err) => "a b").split
-    ).toBe("function");
-    expect(
-      await swear(Promise.reject())
-        .abc("")
-        .catch((err) => "Hello")
-    ).toEqual("Hello");
+    expect(await swear(Promise.resolve("abc")).split("")).toEqual(["a", "b", "c"]);
+    expect(await swear(Promise.resolve("abc")).split("")).toEqual(["a", "b", "c"]);
+    expect(await swear(Promise.resolve("abc")).split("")).toEqual(["a", "b", "c"]);
+    expect(await swear(Promise.reject("Hello")).catch((err) => err)).toEqual("Hello");
+    expect(await swear(Promise.reject("Hello")).catch(() => "a b")).toEqual("a b");
+    expect(typeof (swear(Promise.reject("Hello")).catch(() => "a b") as any).split).toBe("function");
+    expect(await (swear(Promise.reject()) as any).abc("").catch(() => "Hello")).toEqual("Hello");
   });
 
   it("ignores intermediate links in the chain until catch", async () => {
-    expect(
-      await swear(Promise.reject(new Error("rejected")))
-        .split("")
-        .catch((err) => err.message)
-    ).toEqual("rejected");
-    expect(
-      await swear(Promise.reject(new Error("rejected")))
-        .abcde("")
-        .catch((err) => err.message)
-    ).toEqual("rejected");
-    expect(
-      await swear(Promise.reject())
-        .split("")
-        .catch((err) => "Hello")
-    ).toEqual("Hello");
-    expect(
-      await swear(Promise.reject())
-        .abcde("")
-        .catch((err) => "Hello")
-    ).toEqual("Hello");
+    expect(await swear(Promise.reject(new Error("rejected"))).split("").catch((err: any) => err.message)).toEqual("rejected");
+    expect(await (swear(Promise.reject(new Error("rejected"))) as any).abcde("").catch((err: any) => err.message)).toEqual("rejected");
+    expect(await swear(Promise.reject()).split("").catch(() => "Hello")).toEqual("Hello");
+    expect(await (swear(Promise.reject()) as any).abcde("").catch(() => "Hello")).toEqual("Hello");
   });
 
   it("skips intermediate values", async () => {
-    let err;
+    let err: any;
     let called = 0;
     try {
-      await swear(reject())
+      await swear(Promise.reject(new Error("rejected")))
         .split("")
         .map((a) => called++);
     } catch (error) {
       err = error;
     }
-    expect(err).toMatchObject({ message: /rejected/ });
+    expect((err as Error).message).toMatch(/rejected/);
     expect(called).toEqual(0);
   });
 
   it("will do its thing even without awaiting", async () => {
-    const called = [];
+    const called: any[] = [];
 
-    // Sanity check
-    new Promise((ok) => called.push("a"));
+    new Promise((ok) => ok(called.push("a")));
     await wait();
     expect(called).toEqual(["a"]);
 
@@ -249,11 +174,7 @@ describe("numbers", () => {
 
   it("can perform several operations", async () => {
     expect(
-      await swear(3.1)
-        .toFixed(1)
-        .split(".")
-        .map((n) => n * 2)
-        .join(".")
+      await swear(3.1).toFixed(1).split(".").map((n) => (n as any) * 2).join(".")
     ).toBe("6.2");
   });
 });
@@ -284,31 +205,26 @@ describe("functions", () => {
   });
 
   it("accepts and returns the arguments", async () => {
-    const fn = swear((a) => a.split(" "));
+    const fn = swear((a: string) => a.split(" "));
     expect(await fn("Hello world")).toEqual(["Hello", "world"]);
   });
 
   it("can handle promises", async () => {
-    const fn = swear(async (a) => {
-      return a.split(" ");
-    });
+    const fn = swear(async (a: string) => a.split(" "));
     expect(await fn("Hello world")).toEqual(["Hello", "world"]);
   });
 
   it("resolves the arguments before calling the fn", async () => {
-    const fn = swear((a) => a.split(" "));
-    expect(await fn(Promise.resolve("Hello world"))).toEqual([
-      "Hello",
-      "world",
-    ]);
+    const fn = swear((a: string) => a.split(" "));
+    expect(await fn(Promise.resolve("Hello world") as any)).toEqual(["Hello", "world"]);
   });
 });
 
 describe("arrays", () => {
-  const compare = function (a) {
+  const compare = function (this: number, a: number) {
     return a > this;
   };
-  const compareAsync = async function (a) {
+  const compareAsync = async function (this: number, a: number) {
     await wait();
     return a > this;
   };
@@ -326,18 +242,17 @@ describe("arrays", () => {
 
   it("resolves promises like Promise.all()", async () => {
     const array = ["a", Promise.resolve("b")];
-    // expect(await swear(array)).toEqual(['a', 'b']);
-    expect(await swear(array).map((a) => a)).toEqual(["a", "b"]);
+    expect(await swear(array as any).map((a: any) => a)).toEqual(["a", "b"]);
   });
 
   it("resolves promises like Promise.all() recursively", async () => {
     const array = ["a", Promise.resolve("b"), [Promise.resolve("c")]];
-    expect(await swear(array)).toEqual(["a", "b", ["c"]]);
+    expect(await swear(array as any)).toEqual(["a", "b", ["c"]]);
   });
 
-  it("resolves promises like Promise.all() recursively", async () => {
+  it("resolves promises like Promise.all() recursively (rejection)", async () => {
     const array = ["a", Promise.resolve("b"), [Promise.reject("c")]];
-    expect(await swear(array).catch((err) => err)).toEqual("c");
+    expect(await swear(array as any).catch((err) => err)).toEqual("c");
   });
 
   describe(".every()", () => {
@@ -364,13 +279,11 @@ describe("arrays", () => {
 
     it("stops when it finds it", async () => {
       let count = 0;
-      expect(
-        await swear([1, 2, 3]).every(async (a) => {
-          count++;
-          await wait();
-          return a !== 1;
-        })
-      );
+      await swear([1, 2, 3]).every(async (a) => {
+        count++;
+        await wait();
+        return a !== 1;
+      });
       expect(count).toBe(1);
     });
 
@@ -380,16 +293,8 @@ describe("arrays", () => {
     });
 
     it("can do an async every after chaining it", async () => {
-      expect(
-        await swear([1, 2, 3])
-          .map(async (a) => a ** 2)
-          .every(async (a) => a > 0)
-      ).toEqual(true);
-      expect(
-        await swear([1, 2, 3])
-          .map(async (a) => a ** 2)
-          .every(async (a) => a > 3)
-      ).toEqual(false);
+      expect(await swear([1, 2, 3]).map(async (a) => a ** 2).every(async (a) => a > 0)).toEqual(true);
+      expect(await swear([1, 2, 3]).map(async (a) => a ** 2).every(async (a) => a > 3)).toEqual(false);
     });
 
     it("has all the right params for every", async () => {
@@ -425,19 +330,11 @@ describe("arrays", () => {
     });
 
     it("can do an async filter and chain it", async () => {
-      expect(
-        await swear([1, 2, 3])
-          .filter(async (a) => a > 1)
-          .map(async (a) => a ** 2)
-      ).toEqual([4, 9]);
+      expect(await swear([1, 2, 3]).filter(async (a) => a > 1).map(async (a) => a ** 2)).toEqual([4, 9]);
     });
 
     it("can do an async filter after chaining it", async () => {
-      expect(
-        await swear([1, 2, 3])
-          .map(async (a) => a ** 2)
-          .filter(async (a) => a > 1)
-      ).toEqual([4, 9]);
+      expect(await swear([1, 2, 3]).map(async (a) => a ** 2).filter(async (a) => a > 1)).toEqual([4, 9]);
     });
 
     it("has all the right params for filter", async () => {
@@ -456,9 +353,7 @@ describe("arrays", () => {
     });
 
     it("resolves before using it", async () => {
-      expect(
-        await swear([1, Promise.resolve(2), 3]).find((a) => a > 1)
-      ).toEqual(2);
+      expect(await swear([1, Promise.resolve(2), 3] as any).find((a: any) => a > 1)).toEqual(2);
       expect(await swear([1, 2, 3]).find((a) => a > 5)).toEqual(undefined);
     });
 
@@ -481,13 +376,11 @@ describe("arrays", () => {
 
     it("stops when it finds it", async () => {
       let count = 0;
-      expect(
-        await swear([1, 2, 3]).find(async (a) => {
-          count++;
-          await wait();
-          return a === 1;
-        })
-      );
+      await swear([1, 2, 3]).find(async (a) => {
+        count++;
+        await wait();
+        return a === 1;
+      });
       expect(count).toBe(1);
     });
 
@@ -497,11 +390,7 @@ describe("arrays", () => {
     });
 
     it("can do an async filter after chaining it", async () => {
-      expect(
-        await swear([1, 2, 3])
-          .map(async (a) => a ** 2)
-          .find(async (a) => a > 1)
-      ).toEqual(4);
+      expect(await swear([1, 2, 3]).map(async (a) => a ** 2).find(async (a) => a > 1)).toEqual(4);
     });
 
     it("has all the right params for filter", async () => {
@@ -540,13 +429,11 @@ describe("arrays", () => {
 
     it("stops when it finds it", async () => {
       let count = 0;
-      expect(
-        await swear([1, 2, 3]).findIndex(async (a) => {
-          count++;
-          await wait();
-          return a === 1;
-        })
-      );
+      await swear([1, 2, 3]).findIndex(async (a) => {
+        count++;
+        await wait();
+        return a === 1;
+      });
       expect(count).toBe(1);
     });
 
@@ -556,11 +443,7 @@ describe("arrays", () => {
     });
 
     it("can do an async filter after chaining it", async () => {
-      expect(
-        await swear([1, 2, 3])
-          .map(async (a) => a ** 2)
-          .findIndex(async (a) => a > 1)
-      ).toEqual(1);
+      expect(await swear([1, 2, 3]).map(async (a) => a ** 2).findIndex(async (a) => a > 1)).toEqual(1);
     });
 
     it("has all the right params for filter", async () => {
@@ -576,7 +459,7 @@ describe("arrays", () => {
 
   describe(".forEach()", () => {
     it("can do a simple forEach()", async () => {
-      const all = [];
+      const all: number[] = [];
       expect(
         await swear([1, 2, 3]).forEach((a) => {
           all.push(a);
@@ -586,38 +469,22 @@ describe("arrays", () => {
     });
 
     it("maintains this", async () => {
-      await swear([1]).forEach(function () {
+      await swear([1]).forEach(function (this: number) {
         expect(this).toBe(25);
       }, 25);
-      await swear([1]).forEach(async function () {
+      await swear([1]).forEach(async function (this: number) {
         expect(this).toBe(25);
       }, 25);
     });
 
     it("is chainable", async () => {
-      expect(
-        await swear([1, 2, 3])
-          .forEach((a) => false)
-          .map((a) => a ** 2)
-      ).toEqual([1, 4, 9]);
-      expect(
-        await swear([1, 2, 3])
-          .map((a) => a ** 2)
-          .forEach((a) => false)
-      ).toEqual([1, 4, 9]);
-      expect(
-        await swear([1, 2, 3])
-          .forEach(async (a) => false)
-          .map((a) => a ** 2)
-      ).toEqual([1, 4, 9]);
-      expect(
-        await swear([1, 2, 3])
-          .map((a) => a ** 2)
-          .forEach(async (a) => false)
-      ).toEqual([1, 4, 9]);
+      expect(await swear([1, 2, 3]).forEach(() => false).map((a) => a ** 2)).toEqual([1, 4, 9]);
+      expect(await swear([1, 2, 3]).map((a) => a ** 2).forEach(() => false)).toEqual([1, 4, 9]);
+      expect(await swear([1, 2, 3]).forEach(async () => false).map((a) => a ** 2)).toEqual([1, 4, 9]);
+      expect(await swear([1, 2, 3]).map((a) => a ** 2).forEach(async () => false)).toEqual([1, 4, 9]);
     });
 
-    it("has all the right params for filter", async () => {
+    it("has all the right params for forEach", async () => {
       await swear([0, 1, 2]).forEach(async (a, i, all) => {
         expect(a).toEqual(i);
         expect(all).toEqual([0, 1, 2]);
@@ -632,10 +499,9 @@ describe("arrays", () => {
       expect(await swear([1, 2, 3]).reduce((a, b) => a + b, 0)).toEqual(6);
     });
 
-    // Init is by reference, see https://jsfiddle.net/franciscop/1bdsxonp/2/
     it("passes the init by reference", async () => {
       const init = { a: 0 };
-      await swear([1, 2, 3]).reduce((init, b) => {
+      await swear([1, 2, 3]).reduce((init, _b) => {
         init.a++;
         return init;
       }, init);
@@ -644,15 +510,12 @@ describe("arrays", () => {
 
     it("can do a simple async", async () => {
       expect(await swear([1, 2, 3]).reduce(async (a, b) => a + b)).toEqual(6);
-      expect(await swear([1, 2, 3]).reduce(async (a, b) => a + b, 0)).toEqual(
-        6
-      );
+      expect(await swear([1, 2, 3]).reduce(async (a, b) => a + b, 0)).toEqual(6);
     });
 
-    // Init is by reference, see https://jsfiddle.net/franciscop/1bdsxonp/2/
     it("passes the init by reference on async", async () => {
       const init = { a: 0 };
-      await swear([1, 2, 3]).reduce(async (init, b) => {
+      await swear([1, 2, 3]).reduce(async (init, _b) => {
         init.a++;
         await wait();
         return init;
@@ -661,19 +524,11 @@ describe("arrays", () => {
     });
 
     it("can do an async reduce and chain it", async () => {
-      expect(
-        await swear([1, 2, 3])
-          .reduce(async (a, b) => a + b)
-          .toFixed(0)
-      ).toEqual("6");
+      expect(await swear([1, 2, 3]).reduce(async (a, b) => a + b).toFixed(0)).toEqual("6");
     });
 
     it("can do an async reduce after chaining it", async () => {
-      expect(
-        await swear([1, 2, 3])
-          .map(async (a) => a ** 2)
-          .reduce(async (a, b) => a + b)
-      ).toEqual(14);
+      expect(await swear([1, 2, 3]).map(async (a) => a ** 2).reduce(async (a, b) => a + b)).toEqual(14);
     });
 
     it("has all the right params for reduce", async () => {
@@ -695,10 +550,9 @@ describe("arrays", () => {
       expect(await swear([1, 2, 3]).reduceRight((a, b) => a + b, 0)).toEqual(6);
     });
 
-    // Init is by reference, see https://jsfiddle.net/franciscop/1bdsxonp/2/
     it("passes the init by reference", async () => {
       const init = { a: 0 };
-      await swear([1, 2, 3]).reduceRight((init, b) => {
+      await swear([1, 2, 3]).reduceRight((init, _b) => {
         init.a++;
         return init;
       }, init);
@@ -706,18 +560,13 @@ describe("arrays", () => {
     });
 
     it("can do a simple async", async () => {
-      expect(await swear([1, 2, 3]).reduceRight(async (a, b) => a + b)).toEqual(
-        6
-      );
-      expect(
-        await swear([1, 2, 3]).reduceRight(async (a, b) => a + b, 0)
-      ).toEqual(6);
+      expect(await swear([1, 2, 3]).reduceRight(async (a, b) => a + b)).toEqual(6);
+      expect(await swear([1, 2, 3]).reduceRight(async (a, b) => a + b, 0)).toEqual(6);
     });
 
-    // Init is by reference, see https://jsfiddle.net/franciscop/1bdsxonp/2/
     it("passes the init by reference on async", async () => {
       const init = { a: 0 };
-      await swear([1, 2, 3]).reduceRight(async (init, b) => {
+      await swear([1, 2, 3]).reduceRight(async (init, _b) => {
         init.a++;
         await wait();
         return init;
@@ -726,19 +575,11 @@ describe("arrays", () => {
     });
 
     it("can do an async reduceRight and chain it", async () => {
-      expect(
-        await swear([1, 2, 3])
-          .reduceRight(async (a, b) => a + b)
-          .toFixed(0)
-      ).toEqual("6");
+      expect(await swear([1, 2, 3]).reduceRight(async (a, b) => a + b).toFixed(0)).toEqual("6");
     });
 
     it("can do an async reduceRight after chaining it", async () => {
-      expect(
-        await swear([1, 2, 3])
-          .map(async (a) => a ** 2)
-          .reduceRight(async (a, b) => a + b)
-      ).toEqual(14);
+      expect(await swear([1, 2, 3]).map(async (a) => a ** 2).reduceRight(async (a, b) => a + b)).toEqual(14);
     });
 
     it("has all the right params for reduceRight", async () => {
@@ -778,13 +619,11 @@ describe("arrays", () => {
 
     it("stops when it finds it", async () => {
       let count = 0;
-      expect(
-        await swear([1, 2, 3]).some(async (a) => {
-          count++;
-          await wait();
-          return a === 1;
-        })
-      );
+      await swear([1, 2, 3]).some(async (a) => {
+        count++;
+        await wait();
+        return a === 1;
+      });
       expect(count).toBe(1);
     });
 
@@ -794,16 +633,8 @@ describe("arrays", () => {
     });
 
     it("can do an async filter after chaining it", async () => {
-      expect(
-        await swear([1, 2, 3])
-          .map(async (a) => a ** 2)
-          .some(async (a) => a > 1)
-      ).toEqual(true);
-      expect(
-        await swear([1, 2, 3])
-          .map(async (a) => a ** 2)
-          .some(async (a) => a > 9)
-      ).toEqual(false);
+      expect(await swear([1, 2, 3]).map(async (a) => a ** 2).some(async (a) => a > 1)).toEqual(true);
+      expect(await swear([1, 2, 3]).map(async (a) => a ** 2).some(async (a) => a > 9)).toEqual(false);
     });
 
     it("has all the right params for filter", async () => {
@@ -824,14 +655,13 @@ describe("objects", () => {
   });
 
   it("can retrieve nested properties", async () => {
-    // console.log(await swear({ a: { b: 'c' } }).a);
     expect(await swear({ a: { b: "c" } }).a.b).toBe("c");
   });
 });
 
 describe("extend", () => {
-  const double = (obj) => obj + obj;
-  const doubleArray = (obj) => obj.map(double);
+  const double = (obj: any) => obj + obj;
+  const doubleArray = (obj: any[]) => obj.map(double);
 
   it("can accept no options", async () => {
     await swear("a");
@@ -840,59 +670,47 @@ describe("extend", () => {
 
   it("can extend anything", async () => {
     const opts = { double };
-    expect(await swear(1, opts).double()).toEqual(2);
-    expect(await swear("a", opts).double()).toEqual("aa");
+    expect(await (swear(1, opts) as any).double()).toEqual(2);
+    expect(await (swear("a", opts) as any).double()).toEqual("aa");
   });
 
   it("can extend numbers", async () => {
     const opts = { number: { double } };
-    expect(await swear(1, opts).double()).toEqual(2);
+    expect(await (swear(1, opts) as any).double()).toEqual(2);
   });
 
   it("can extend strings", async () => {
     const opts = { string: { double } };
-    expect(await swear("a", opts).double()).toEqual("aa");
+    expect(await (swear("a", opts) as any).double()).toEqual("aa");
   });
 
   it("can extend arrays", async () => {
     const opts = { array: { double: doubleArray } };
-    expect(await swear([1], opts).double()).toEqual([2]);
-    expect(await swear(["a"], opts).double()).toEqual(["aa"]);
+    expect(await (swear([1], opts) as any).double()).toEqual([2]);
+    expect(await (swear(["a"], opts) as any).double()).toEqual(["aa"]);
   });
 
   it("can extend functions", async () => {
     const opts = { double };
-    const deferred = swear((a) => a * 3, opts);
-    expect(await deferred(2).double()).toEqual(12);
+    const deferred = swear((a: number) => a * 3, opts);
+    expect(await (deferred(2) as any).double()).toEqual(12);
   });
 
   it("can be extended later in the chain", async () => {
     const opts = { array: { double: doubleArray } };
-    expect(
-      await swear(["a"], opts)
-        .map((a) => a)
-        .double()
-    ).toEqual(["aa"]);
+    expect(await (swear(["a"], opts).map((a) => a) as any).double()).toEqual(["aa"]);
   });
 
   it("returns the proper instance", async () => {
     const opts = { array: { double: doubleArray } };
-    expect(
-      await swear(["a"], opts)
-        .double()
-        .map((a) => a)
-    ).toEqual(["aa"]);
+    expect(await (swear(["a"], opts) as any).double().map((a: any) => a)).toEqual(["aa"]);
   });
 
   it("has the right arguments", async () => {
     const array = {
-      abc: (obj, ...args) => "a" + obj.join("") + args.join("") + "f",
+      abc: (obj: string[], ...args: string[]) => "a" + obj.join("") + args.join("") + "f",
     };
-    expect(
-      await swear(["b", "c"], { array })
-        .map((a) => a)
-        .abc("d", "e")
-    ).toBe("abcdef");
+    expect(await (swear(["b", "c"], { array }).map((a) => a) as any).abc("d", "e")).toBe("abcdef");
   });
 });
 
@@ -903,23 +721,23 @@ describe("examples", () => {
         { id: 0, name: "Maria", address: { city: "London" } },
         { id: 1, name: "John", address: { city: "London" } },
       ];
-      const courses = [];
+      const courses: any[] = [];
 
-      const find = function (obj, filter) {
-        const [key, value] = Object.entries(filter)[0];
+      const find = (obj: any[], filter: Record<string, any>) => {
+        const [key, value] = Object.entries(filter)[0] as [string, any];
         const result = obj.find((obj) => obj[key] === value);
-        if (!result) throw new Error(`Item not found for the filter ${filter}`);
-        return obj.find((obj) => obj[key] === value);
+        if (!result) throw new Error(`Item not found for the filter ${JSON.stringify(filter)}`);
+        return result;
       };
 
       return swear({ users, courses }, { find });
     })();
 
     it("can be initialized", async () => {
-      const name = await db.users.find({ id: 1 }).name;
+      const name = await (db as any).users.find({ id: 1 }).name;
       expect(name).toEqual("John");
 
-      const city = await db.users.find({ id: 1 }).address.city;
+      const city = await (db as any).users.find({ id: 1 }).address.city;
       expect(city).toEqual("London");
     });
   });
