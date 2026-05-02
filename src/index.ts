@@ -193,6 +193,10 @@ function swear<T, M extends Record<string, any> = {}>(
   options?: SwearOptions<M>
 ): Swear<Awaited<T>, M>;
 
+function swear<R>(fn: (...args: any[]) => any, options?: SwearOptions<any>): R;
+
+function swear<R>(value: any, options?: SwearOptions<any>): R;
+
 function swear(obj: any, { number, string, array, ...others }: SwearOptions = {}): any {
   if (typeof obj === "function") {
     return (...args: any[]) =>

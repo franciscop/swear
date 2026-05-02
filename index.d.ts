@@ -22,6 +22,8 @@ export type SwearOptions<M extends Record<string, any> = {}> = M & {
 };
 declare function swear<T extends (...args: any[]) => any, M extends Record<string, any> = {}>(fn: T, options?: SwearOptions<M>): (...args: Parameters<T>) => Swear<Awaited<ReturnType<T>>, M>;
 declare function swear<T, M extends Record<string, any> = {}>(value: T, options?: SwearOptions<M>): Swear<Awaited<T>, M>;
+declare function swear<R>(fn: (...args: any[]) => any, options?: SwearOptions<any>): R;
+declare function swear<R>(value: any, options?: SwearOptions<any>): R;
 
 export {
 	swear as default,
