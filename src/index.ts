@@ -4,36 +4,69 @@
 type SwearCallback<T, R> = (
   item: T,
   index: number,
-  arr: readonly T[]
+  arr: readonly T[],
 ) => R | Promise<R>;
 
+// Allows RegExp as shorthand callback for string arrays
+type SwearCb<T, R> = SwearCallback<T, R> | (T extends string ? RegExp : never);
+
+// Infers element type without noUncheckedIndexedAccess adding `| undefined`
+type ElemOf<T extends readonly any[]> = T extends readonly (infer E)[] ? E : never;
+
 type SwearArrayMethods<T extends readonly any[]> = {
-  filter(cb: SwearCallback<T[number], boolean>): Swear<Array<T[number]>>;
-  find(cb: SwearCallback<T[number], boolean>): Swear<T[number] | undefined>;
-  findIndex(cb: SwearCallback<T[number], boolean>): Swear<number>;
-  forEach(cb: SwearCallback<T[number], any>): Swear<Array<T[number]>>;
-  every(cb: SwearCallback<T[number], boolean>): Swear<boolean>;
-  some(cb: SwearCallback<T[number], boolean>): Swear<boolean>;
-  reduce<U = T[number]>(
-    cb: (acc: U, item: T[number], index: number, arr: readonly T[number][]) => U | Promise<U>,
-    initial?: U
+  filter(cb: SwearCb<ElemOf<T>, boolean>): Swear<ElemOf<T>[]>;
+  find(cb: SwearCb<ElemOf<T>, boolean>): Swear<ElemOf<T> | undefined>;
+  findIndex(cb: SwearCb<ElemOf<T>, boolean>): Swear<number>;
+  forEach(cb: SwearCallback<ElemOf<T>, any>): Swear<ElemOf<T>[]>;
+  every(cb: SwearCb<ElemOf<T>, boolean>): Swear<boolean>;
+  map<U>(cb: SwearCallback<any, U>): Swear<U[]>;
+  some(cb: SwearCb<ElemOf<T>, boolean>): Swear<boolean>;
+  // Two overloads: with initial (U free) and without (U = element type)
+  reduce<U>(
+    cb: (acc: U, item: ElemOf<T>, index: number, arr: readonly ElemOf<T>[]) => U | Promise<U>,
+    initial: U,
   ): Swear<U>;
-  reduceRight<U = T[number]>(
-    cb: (acc: U, item: T[number], index: number, arr: readonly T[number][]) => U | Promise<U>,
-    initial?: U
+  reduce(
+    cb: (
+      acc: ElemOf<T>,
+      item: ElemOf<T>,
+      index: number,
+      arr: readonly ElemOf<T>[],
+    ) => ElemOf<T> | Promise<ElemOf<T>>,
+  ): Swear<ElemOf<T>>;
+  reduceRight<U>(
+    cb: (acc: U, item: ElemOf<T>, index: number, arr: readonly ElemOf<T>[]) => U | Promise<U>,
+    initial: U,
   ): Swear<U>;
+  reduceRight(
+    cb: (
+      acc: ElemOf<T>,
+      item: ElemOf<T>,
+      index: number,
+      arr: readonly ElemOf<T>[],
+    ) => ElemOf<T> | Promise<ElemOf<T>>,
+  ): Swear<ElemOf<T>>;
 };
 
+// Exclude valueOf/toString to break self-referential cycles that break Awaited<Swear<T>>
+// Use any[] for args to avoid losing overloaded method signatures (e.g. String.prototype.split)
 type SwearProps<T> = {
-  [K in keyof T]: T[K] extends (...args: infer A) => infer R
-    ? (...args: A) => Swear<Awaited<R>>
+  [K in Exclude<keyof T, "valueOf" | "toString">]: T[K] extends (...args: any[]) => infer R
+    ? (...args: any[]) => Swear<Awaited<R>>
     : Swear<T[K]>;
 };
 
 export type Swear<T, M extends Record<string, any> = {}> = Promise<T> &
-  (T extends readonly any[]
-    ? SwearArrayMethods<T> & SwearProps<T>
-    : SwearProps<T>) &
+  // 0 extends 1 & T is the standard trick to detect `any` — any methods allowed
+  (0 extends 1 & T
+    ? SwearArrayMethods<any[]> & SwearProps<any>
+    : [T] extends [never]
+      ? SwearProps<string>
+      : T extends (...args: infer A) => infer R
+        ? (...args: A) => Swear<Awaited<R>, M>
+        : T extends readonly any[]
+          ? SwearArrayMethods<T> & SwearProps<T>
+          : SwearProps<T>) &
   M;
 
 export type SwearOptions<M extends Record<string, any> = {}> = M & {
@@ -53,17 +86,24 @@ const resolve = async (value: any): Promise<any> => {
 
 const rejected = (message: string) => Promise.reject(new Error(message));
 
-const regexpCallback = (cb: any) => (cb instanceof RegExp ? cb.test.bind(cb) : cb);
-const callback = (cb: any, self?: any) => (...args: any[]) =>
-  regexpCallback(cb).call(self, ...args);
-const extend = (cb: any, self?: any) => async (value: any, i: number, all: any[]) => ({
-  value,
-  extra: await callback(cb, self)(value, i, all),
-});
+const regexpCallback = (cb: any) =>
+  cb instanceof RegExp ? cb.test.bind(cb) : cb;
+const callback =
+  (cb: any, self?: any) =>
+  (...args: any[]) =>
+    regexpCallback(cb).call(self, ...args);
+const extend =
+  (cb: any, self?: any) => async (value: any, i: number, all: any[]) => ({
+    value,
+    extra: await callback(cb, self)(value, i, all),
+  });
 const extraUp = ({ extra }: { extra: any }) => extra;
 const valueUp = ({ value }: { value: any }) => value;
 
-const extendArray: Record<string, (obj: any[], cb: any, self?: any) => Promise<any>> = {
+const extendArray: Record<
+  string,
+  (obj: any[], cb: any, self?: any) => Promise<any>
+> = {
   every: async (obj, cb, self) => {
     for (let i = 0; i < obj.length; i++) {
       const found = await callback(cb, self)(obj[i], i, obj);
@@ -159,23 +199,24 @@ const getter = (obj: any, ext: any) => (_target: any, key: any) => {
 
       return func(obj[key], ext);
     }),
-    ext
+    ext,
   );
 };
 
-const applier = (obj: any, ext: any) => (_target: any, _self: any, args: any[]) => {
-  return func(
-    resolve(obj).then((obj: any) => {
-      if (typeof obj !== "function") {
-        return rejected(
-          `You tried to call the non-function "${JSON.stringify(obj)}" (${typeof obj}).`
-        );
-      }
-      return obj(...args);
-    }),
-    ext
-  );
-};
+const applier =
+  (obj: any, ext: any) => (_target: any, _self: any, args: any[]) => {
+    return func(
+      resolve(obj).then((obj: any) => {
+        if (typeof obj !== "function") {
+          return rejected(
+            `You tried to call the non-function "${JSON.stringify(obj)}" (${typeof obj}).`,
+          );
+        }
+        return obj(...args);
+      }),
+      ext,
+    );
+  };
 
 const func = (obj: any, ext: any): any =>
   new Proxy(() => {}, {
@@ -183,29 +224,26 @@ const func = (obj: any, ext: any): any =>
     apply: applier(obj, ext),
   });
 
-function swear<T extends (...args: any[]) => any, M extends Record<string, any> = {}>(
-  fn: T,
-  options?: SwearOptions<M>
-): (...args: Parameters<T>) => Swear<Awaited<ReturnType<T>>, M>;
-
 function swear<T, M extends Record<string, any> = {}>(
   value: T,
-  options?: SwearOptions<M>
+  options?: SwearOptions<M>,
 ): Swear<Awaited<T>, M>;
 
-function swear<R>(fn: (...args: any[]) => any, options?: SwearOptions<any>): R;
-
-function swear<R>(value: any, options?: SwearOptions<any>): R;
-
-function swear(obj: any, { number, string, array, ...others }: SwearOptions = {}): any {
+function swear(
+  obj: any,
+  { number, string, array, ...others }: SwearOptions = {},
+): any {
   if (typeof obj === "function") {
     return (...args: any[]) =>
-      swear(Promise.all(args).then((args) => obj(...args)), {
-        number,
-        string,
-        array,
-        ...others,
-      });
+      swear(
+        Promise.all(args).then((args) => obj(...args)),
+        {
+          number,
+          string,
+          array,
+          ...others,
+        },
+      );
   }
   return new Proxy(
     {},
@@ -216,7 +254,7 @@ function swear(obj: any, { number, string, array, ...others }: SwearOptions = {}
         array: { ...extendArray, ...array },
         ...others,
       }),
-    }
+    },
   );
 }
 

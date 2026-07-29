@@ -1,33 +1,17 @@
 {
   "compilerOptions": {
-    // Language and Environment
     "target": "ES2022",
     "lib": ["ES2022"],
     "module": "ESNext",
     "moduleResolution": "bundler",
-
-    // Type Checking - Strict Mode
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
-    "allowUnusedLabels": false,
-    "allowUnreachableCode": false,
-    "exactOptionalPropertyTypes": false,
-
-    // Module Resolution
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-
-    // Emit
     "noEmit": true,
-
-    // Skip type checking for dependencies
-    "skipLibCheck": true
+    "esModuleInterop": true,
+    "skipLibCheck": true,
   },
-  "include": ["src/index.ts"],
-  "exclude": ["node_modules"]
+  "include": ["src"],
 }

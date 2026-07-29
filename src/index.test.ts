@@ -135,7 +135,7 @@ describe("promises", () => {
     try {
       await swear(Promise.reject(new Error("rejected")))
         .split("")
-        .map((a) => called++);
+        .map(() => called++);
     } catch (error) {
       err = error;
     }

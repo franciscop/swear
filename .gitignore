@@ -1,5 +1,6 @@
 # Should not commit for packages
 package-lock.json
+bun.lock
 
 # Logs
 logs
