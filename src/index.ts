@@ -11,7 +11,9 @@ type SwearCallback<T, R> = (
 type SwearCb<T, R> = SwearCallback<T, R> | (T extends string ? RegExp : never);
 
 // Infers element type without noUncheckedIndexedAccess adding `| undefined`
-type ElemOf<T extends readonly any[]> = T extends readonly (infer E)[] ? E : never;
+type ElemOf<T extends readonly any[]> = T extends readonly (infer E)[]
+  ? E
+  : never;
 
 type SwearArrayMethods<T extends readonly any[]> = {
   filter(cb: SwearCb<ElemOf<T>, boolean>): Swear<ElemOf<T>[]>;
@@ -23,7 +25,12 @@ type SwearArrayMethods<T extends readonly any[]> = {
   some(cb: SwearCb<ElemOf<T>, boolean>): Swear<boolean>;
   // Two overloads: with initial (U free) and without (U = element type)
   reduce<U>(
-    cb: (acc: U, item: ElemOf<T>, index: number, arr: readonly ElemOf<T>[]) => U | Promise<U>,
+    cb: (
+      acc: U,
+      item: ElemOf<T>,
+      index: number,
+      arr: readonly ElemOf<T>[],
+    ) => U | Promise<U>,
     initial: U,
   ): Swear<U>;
   reduce(
@@ -35,7 +42,12 @@ type SwearArrayMethods<T extends readonly any[]> = {
     ) => ElemOf<T> | Promise<ElemOf<T>>,
   ): Swear<ElemOf<T>>;
   reduceRight<U>(
-    cb: (acc: U, item: ElemOf<T>, index: number, arr: readonly ElemOf<T>[]) => U | Promise<U>,
+    cb: (
+      acc: U,
+      item: ElemOf<T>,
+      index: number,
+      arr: readonly ElemOf<T>[],
+    ) => U | Promise<U>,
     initial: U,
   ): Swear<U>;
   reduceRight(
@@ -51,7 +63,9 @@ type SwearArrayMethods<T extends readonly any[]> = {
 // Exclude valueOf/toString to break self-referential cycles that break Awaited<Swear<T>>
 // Use any[] for args to avoid losing overloaded method signatures (e.g. String.prototype.split)
 type SwearProps<T> = {
-  [K in Exclude<keyof T, "valueOf" | "toString">]: T[K] extends (...args: any[]) => infer R
+  [K in Exclude<keyof T, "valueOf" | "toString">]: T[K] extends (
+    ...args: any[]
+  ) => infer R
     ? (...args: any[]) => Swear<Awaited<R>>
     : Swear<T[K]>;
 };
